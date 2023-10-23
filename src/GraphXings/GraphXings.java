@@ -1,6 +1,6 @@
 package GraphXings;
 
-import GraphXings.Algorithms.BetterThanRandomPlayer;
+import GraphXings.Algorithms.BruteForcePlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -55,21 +55,20 @@ public class GraphXings
         g.addEdge(e9);
         g.addEdge(e10);
         // Run the game with two players.
-        /*
-        Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
-        GameResult res = game.play();
-        // Display the result!
-        System.out.println(res.announceResult());
-         */
+        //Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new BruteForcePlayer("Player 2"));
+        //GameResult res = game.play();
+        //// Display the result!
+        //System.out.println(res.announceResult());
 
-         for(int i=0; i<10;i++)
-         {
-            Game game = new Game(g,5,4,new BetterThanRandomPlayer("Player 1"), new RandomPlayer("Player 2"));
+
+
+        for(int i=0; i<100;i++)
+        {
+            Game game = new Game(g,5,4,new BruteForcePlayer("Player 1"), new RandomPlayer("Player 2"));
             GameResult res = game.play();
             // Display the result!
-             System.out.println(res.announceResult());
+            System.out.println(res.announceResult());
 
-         }
-
+        }
     }
 }
