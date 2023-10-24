@@ -61,14 +61,18 @@ public class GraphXings
         //System.out.println(res.announceResult());
 
 
-
-        for(int i=0; i<100;i++)
+        int player1Wins = 0;
+        int ties = 0;
+        int totalGames = 1000;
+        for(int i=0; i<totalGames;i++)
         {
             Game game = new Game(g,5,4,new BruteForcePlayer("Player 1"), new RandomPlayer("Player 2"));
             GameResult res = game.play();
+            if (res.announceResult().startsWith("Player 1 beats Player 2")) player1Wins++;
+            else if (res.announceResult().startsWith("It's a tie")) ties++;
             // Display the result!
             System.out.println(res.announceResult());
-
         }
+        System.out.println("Player 1 has won " + player1Wins + " of " + totalGames + " games (ties: " + ties + ")");
     }
 }
