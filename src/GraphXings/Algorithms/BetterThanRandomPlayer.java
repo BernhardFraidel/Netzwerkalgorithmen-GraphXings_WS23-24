@@ -231,7 +231,7 @@ public class BetterThanRandomPlayer implements Player
     return gPrime;
 }
     @Override
-    public void initializeNextRound()
+    public void initializeNextRound(Graph g, int width, int height, Role role)
     {
 
     }

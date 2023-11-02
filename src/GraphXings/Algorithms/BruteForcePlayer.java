@@ -40,7 +40,7 @@ public class BruteForcePlayer implements Player
     }
 
     @Override
-    public void initializeNextRound()
+    public void initializeNextRound(Graph g, int width, int height, Role role)
     {
 
     }
