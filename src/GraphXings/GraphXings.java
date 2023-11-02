@@ -8,71 +8,37 @@ import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameResult;
 
-public class GraphXings
-{
-    public static void main (String[] args)
-    {
+public class GraphXings {
+    public static void main(String[] args) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
-        Vertex v1 = new Vertex("1");
-        Vertex v2 = new Vertex("2");
-        Vertex v3 = new Vertex("3");
-        Vertex v4 = new Vertex("4");
-        Vertex v5 = new Vertex("5");
-        Vertex v6 = new Vertex("6");
-        Vertex v7 = new Vertex("7");
-        Vertex v8 = new Vertex("8");
-        Vertex v9 = new Vertex("9");
-        Vertex v10 = new Vertex("10");
-        g.addVertex(v1);
-        g.addVertex(v2);
-        g.addVertex(v3);
-        g.addVertex(v4);
-        g.addVertex(v5);
-        g.addVertex(v6);
-        g.addVertex(v7);
-        g.addVertex(v8);
-        g.addVertex(v9);
-        g.addVertex(v10);
-        Edge e1 = new Edge(v1, v2);
-        Edge e2 = new Edge(v2, v3);
-        Edge e3 = new Edge(v3, v4);
-        Edge e4 = new Edge(v4, v5);
-        Edge e5 = new Edge(v5, v6);
-        Edge e6 = new Edge(v6, v7);
-        Edge e7 = new Edge(v7, v8);
-        Edge e8 = new Edge(v8, v9);
-        Edge e9 = new Edge(v9, v10);
-        Edge e10 = new Edge(v10, v1);
-        g.addEdge(e1);
-        g.addEdge(e2);
-        g.addEdge(e3);
-        g.addEdge(e4);
-        g.addEdge(e5);
-        g.addEdge(e6);
-        g.addEdge(e7);
-        g.addEdge(e8);
-        g.addEdge(e9);
-        g.addEdge(e10);
-        // Run the game with two players.
-        //Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new BruteForcePlayer("Player 2"));
-        //GameResult res = game.play();
-        //// Display the result!
-        //System.out.println(res.announceResult());
+        //create and save first vertex
+        Vertex firstVertex = new Vertex("0");
+        g.addVertex(firstVertex);
+        Vertex previousVertex = firstVertex;
+        int numVertices = 10;
 
-
-        int player1Wins = 0;
-        int ties = 0;
-        int totalGames = 1000;
-        for(int i=0; i<totalGames;i++)
-        {
-            Game game = new Game(g,5,4,new BruteForcePlayer("Player 1"), new RandomPlayer("Player 2"));
-            GameResult res = game.play();
-            if (res.announceResult().startsWith("Player 1 beats Player 2")) player1Wins++;
-            else if (res.announceResult().startsWith("It's a tie")) ties++;
-            // Display the result!
-            System.out.println(res.announceResult());
+        for (int i = 1; i < numVertices; i++) {
+            //create new vertex
+            Vertex newVertex = new Vertex(Integer.toString(i));
+            g.addVertex(newVertex);
+            //create edge between new vertex and previous vertex
+            Edge newEdge = new Edge(previousVertex, newVertex);
+            g.addEdge(newEdge);
+            //save new vertex for next iteration
+            previousVertex = newVertex;
         }
-        System.out.println("Player 1 has won " + player1Wins + " of " + totalGames + " games (ties: " + ties + ")");
+        //connect last and first vertex to get cycle
+        Edge newEdge = new Edge(previousVertex, firstVertex);
+        g.addEdge(newEdge);
+
+        // Run the game with two players.
+        Game game = new Game(g, 1000, 100, new RandomPlayer("Player 1"), new BruteForcePlayer("Player 2"));
+        long t0 = System.currentTimeMillis();
+        GameResult res = game.play();
+        long runningTime = System.currentTimeMillis() - t0;
+        // Display the result!
+        System.out.println("running time: " + runningTime + "ms");
+        System.out.println(res.announceResult());
     }
 }
