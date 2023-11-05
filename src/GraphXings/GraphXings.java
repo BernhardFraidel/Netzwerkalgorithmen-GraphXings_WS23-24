@@ -1,5 +1,8 @@
 package GraphXings;
 
+import java.time.Instant;
+import java.time.Duration;
+
 import GraphXings.Algorithms.BetterThanRandomPlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
@@ -54,6 +57,31 @@ public class GraphXings
         g.addEdge(e8);
         g.addEdge(e9);
         g.addEdge(e10);
+
+        int n = 100; // number of nodes and edges
+        int w = 20;
+        int h = 10;
+
+                // new graph gBig
+                Graph gBig = new Graph();
+                
+                Vertex vertices[] = new Vertex[n];
+                Edge edges[] = new Edge[n];
+        
+                for(int i = 0; i<n;i++)
+                {
+                    vertices[i] = new Vertex(String.valueOf(i));
+                    gBig.addVertex(vertices[i]);
+                }
+        
+                for(int j=0; j<n;j++)
+                {   
+                    edges[j] = new Edge(vertices[j],vertices[(j+1)%n]);
+                    gBig.addEdge(edges[j]);
+                }
+        
+ 
+
         // Run the game with two players.
         /*
         Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
@@ -63,11 +91,21 @@ public class GraphXings
          */
 
          for(int i=0; i<10;i++)
-         {
-            Game game = new Game(g,5,4,new BetterThanRandomPlayer("Player 1"), new RandomPlayer("Player 2"));
+         {  
+            Instant start = Instant.now();
+
+            Game game = new Game(gBig,w,h,new BetterThanRandomPlayer("BetterThanRandomPlayer"), new RandomPlayer("RandomPlayer"));
             GameResult res = game.play();
             // Display the result!
-             System.out.println(res.announceResult());
+            System.out.println("\n");
+            System.out.println(res.announceResult());
+    
+            Instant finish = Instant.now();
+
+            long timeElapsed = Duration.between(start, finish).toMillis();
+            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds");
+
+            
 
          }
 
