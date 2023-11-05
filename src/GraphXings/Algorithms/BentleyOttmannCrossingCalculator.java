@@ -9,65 +9,90 @@ public class BentleyOttmannCrossingCalculator {
     HashMap<Vertex, Coordinate> vertexCoordinates;
     Queue<Event> eventQueue;
     List<Segment> activeSegments;
+    int intersections;
 
     public BentleyOttmannCrossingCalculator(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates) {
         this.g = g;
         this.vertexCoordinates = vertexCoordinates;
     }
 
-    public int computeWithUpperBound(int upperBound) {
-        return 0;
+    public int calculateWithUpperBound(int upperBound) {
+        return calculate();
     }
 
-    public int compute() {
+    public int calculate() {
         initialize();
 
         while (!this.eventQueue.isEmpty()) {
             Event event = this.eventQueue.poll();
+            Segment segment = event.segments.get(0);
             switch (event.eventType) {
-                case SEGMENT_START:
-                    //insert new segment at correct position
-                    int index = getIndexForSegmentInsertion(event.coordinate.getX(), event.coordinate.getY());
-                    this.activeSegments.add(index, event.segment);
+                case SEGMENT_START -> {
+                    //insert new segments at correct position
+                    int insertionIndex = getIndexForSegmentInsertion(event.point);
+                    this.activeSegments.add(insertionIndex, segment);
 
+                    //check for intersection of new segments with lower neighbor
+                    Segment lowerNeighbour = this.activeSegments.get(insertionIndex);
+                    checkForIntersectionAndAddEvent(lowerNeighbour, segment);
 
-                    //check new segment for intersection with neighbors
-                    Segment lowerNeighbour = this.activeSegments.get(index);
-                    if (Segment.intersect(event.segment, lowerNeighbour)) {
-                        //TODO: get intersection coordinates
-                        Coordinate intersectionCoordinate = new Coordinate(0,0);
-                        Event newEvent = new Event(intersectionCoordinate, EventType.INTERSECTION, ) //TODO: two segments for this event?
-                    }
-
-
-                    //TODO: same with upper neighbour
+                    //same with upper neighbour
                     try {
-                        Segment upperNeighbour = this.activeSegments.get(index + 2);
+                        Segment upperNeighbour = this.activeSegments.get(insertionIndex + 2);
+                        checkForIntersectionAndAddEvent(segment, upperNeighbour);
+                    } catch (IndexOutOfBoundsException ignored) {
+                    }
+                }
+                case SEGMENT_END -> {
+                    //check neighbors for intersection
+                    int index = this.activeSegments.indexOf(segment);
+                    try {
+                        Segment lowerNeighbour = this.activeSegments.get(index - 1);
+                        Segment upperNeighbour = this.activeSegments.get(index + 1);
+                        checkForIntersectionAndAddEvent(lowerNeighbour, upperNeighbour);
                     } catch (IndexOutOfBoundsException ignored) {
                     }
 
+                    //remove from active segments
+                    this.activeSegments.remove(index);
+                }
+                case INTERSECTION -> {
+                    //increment intersection count
+                    intersections++;
+                    Segment upperSegment = event.segments.get(1);
+                    int lowerIndex = this.activeSegments.indexOf(segment);
+                    int upperIndex = this.activeSegments.indexOf(upperSegment);
 
-                    break;
-                case SEGMENT_END:
-                    //TODO: delete from active segments and maybe check new neighbours for intersection?
-                    break;
-                case INTERSECTION:
-                    //TODO: increment intersection count and swap intersecting segments (in activeSegments list)
-                    break;
-                default:
-                    break;
+                    //the two segments must be neighbors
+                    assert Math.abs(lowerIndex - upperIndex) == 1;
+
+                    //swap intersecting segments (in activeSegments list)
+                    Collections.swap(this.activeSegments, lowerIndex, upperIndex);
+                }
+                default -> {
+                }
             }
         }
 
-        return 0;
+        return intersections;
     }
 
-    private int getIndexForSegmentInsertion(int segmentX, int segmentY) {
+    private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2) {
+        try {
+            Segment.getIntersection(segment1, segment2).ifPresent(point -> {
+                Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
+                this.eventQueue.add(newEvent);
+            });
+        } catch (IndexOutOfBoundsException ignored) {
+        }
+    }
+
+    private int getIndexForSegmentInsertion(Point point) {
         int index = 0;
         for (Segment segment : this.activeSegments) {
-            Rational y = Rational.plus(Rational.times(segment.getA(), new Rational(segmentX)), segment.getB());
+            Rational y = Rational.plus(Rational.times(segment.getA(), point.x()), segment.getB());
             index = this.activeSegments.indexOf(segment) + 1;
-            if (!Rational.lesserEqual(new Rational(segmentY), y)) {
+            if (!Rational.lesserEqual(point.y(), y)) {
                 break;
             }
         }
@@ -75,19 +100,24 @@ public class BentleyOttmannCrossingCalculator {
     }
 
 
-
     private void initialize() {
+        intersections = 0;
         //init queue
-        //this.eventQueue = new PriorityQueue<>(Comparator.comparingInt(o -> o.coordinate.getX()));
+        //the queue orders the events after the x point, then after the y point
+        //and finally after the direction of the segments in case the events have the same coordinates
         this.eventQueue = new PriorityQueue<>((o1, o2) -> {
-            if (o1.coordinate.getX() > o2.coordinate.getX()) return 1;
-            else if (o1.coordinate.getX() < o2.coordinate.getX()) return -1;
+            if (!Rational.lesserEqual(o1.point.x(), o2.point.x())) return 1;
+            else if (Rational.lesserEqual(o1.point.x(), o2.point.x()) && !Rational.equals(o1.point.x(), o2.point.x()))
+                return -1;
             else {
-                if (o1.coordinate.getY() > o2.coordinate.getY()) return 1;
-                else if (o1.coordinate.getY() < o2.coordinate.getY()) return -1;
+                if (!Rational.lesserEqual(o1.point.y(), o2.point.y())) return 1;
+                else if (Rational.lesserEqual(o1.point.y(), o2.point.y()) && !Rational.equals(o1.point.y(), o2.point.y()))
+                    return -1;
                 else {
-                    if (o1.segment.getEndY().equals(o2.segment.getEndY())) return 0;
-                    else if (Rational.lesserEqual(o1.segment.getEndY(), o2.segment.getEndY())) return -1;
+                    Segment o1Segment = o1.segments.get(0);
+                    Segment o2Segment = o2.segments.get(0);
+                    if (o1Segment.getEndY().equals(o2Segment.getEndY())) return 0;
+                    else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
                     else return 1;
                 }
             }
@@ -103,8 +133,8 @@ public class BentleyOttmannCrossingCalculator {
             Coordinate end = start.equals(tCoordinate) ? sCoordinate : tCoordinate;
 
             Segment segment = new Segment(start, end);
-            Event newStartEvent = new Event(start, EventType.SEGMENT_START, segment);
-            Event newEndEvent = new Event(end, EventType.SEGMENT_END, segment);
+            Event newStartEvent = new Event(new Point(new Rational(start.getX()), new Rational(start.getY())), EventType.SEGMENT_START, List.of(segment));
+            Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment));
             this.eventQueue.add(newStartEvent);
             this.eventQueue.add(newEndEvent);
             //if (!this.eventQueue.contains(newStartEvent)) {
@@ -116,74 +146,14 @@ public class BentleyOttmannCrossingCalculator {
         }
     }
 
-    private List<Event> findIntersections(List<LineSegment> segments) {
-        List<Event> intersections = new ArrayList<>();
 
-        // Create a priority queue for events (endpoints and intersection points).
-        PriorityQueue<Event> eventQueue = new PriorityQueue<>();
-
-        // Create a binary search tree (TreeMap) to maintain the order of active segments.
-        TreeMap<Integer, LineSegment> activeSegments = new TreeMap<>();
-
-        // Add segment endpoints as events to the priority queue.
-        for (LineSegment segment : segments) {
-            eventQueue.add(segment.start);
-            eventQueue.add(segment.end);
-        }
-
-        while (!eventQueue.isEmpty()) {
-            Event event = eventQueue.poll();
-
-            // Handle the event based on its type (start, end, or intersection).
-            if (event == event.start) {
-                // Handle a start point event.
-                activeSegments.put(event.start.y, segment);
-            } else if (event == event.end) {
-                // Handle an end point event.
-                activeSegments.remove(event.start.y);
-            } else {
-                // Handle an intersection event.
-                intersections.add(event);
-                // Swap the two segments in the binary search tree.
-                LineSegment segment1 = activeSegments.get(event.start.y);
-                LineSegment segment2 = activeSegments.higherEntry(event.start.y).getValue();
-                activeSegments.remove(event.start.y);
-                activeSegments.remove(event.start.y); // Remove both segments.
-                activeSegments.put(event.start.y, segment2);
-                activeSegments.put(event.start.y, segment1);
-            }
-        }
-
-        return intersections;
+    private record Event(Point point, EventType eventType, List<Segment> segments) {
     }
 
-    public static void main(String[] args) {
-        // Create a list of line segments.
-        List<LineSegment> segments = new ArrayList<>();
-        // Add your line segments to the list.
-
-        List<Event> intersections = findIntersections(segments);
-        // Process the intersections found.
-    }
-
-    private record Event(Coordinate coordinate, EventType eventType, Segment segment) {
-    }
 
     private enum EventType {
         SEGMENT_START,
         SEGMENT_END,
         INTERSECTION
-    }
-
-    class LineSegment {
-        Event start, end;
-
-        public LineSegment(Event start, Event end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        // Implement a method to check for intersection with another line segment.
-        // You'll need to compare slopes and use 2D geometry algorithms here.
     }
 }
