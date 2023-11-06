@@ -4,14 +4,11 @@ import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-import GraphXings.Game.Game;
-import GraphXings.Game.GameMove;
-import GraphXings.Game.GameResult;
 
 import java.util.HashMap;
 
-public class Test_Algorithms {
-    public static void Test_BentleyOttman(){
+public class TestAlgorithms {
+    public static void testBentleyOttman(){
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
         //create and save first vertex
