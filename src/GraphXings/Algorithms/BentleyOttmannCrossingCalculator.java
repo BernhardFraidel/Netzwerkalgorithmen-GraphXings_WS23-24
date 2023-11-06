@@ -30,9 +30,14 @@ public class BentleyOttmannCrossingCalculator {
                 case SEGMENT_START -> {
                     //insert new segments at correct position
                     int insertionIndex = getIndexForSegmentInsertion(event.point);
-                    this.activeSegments.add(insertionIndex, segment);
+                    if (insertionIndex != -1) {
+                        this.activeSegments.add(insertionIndex, segment);
+                    } else {
+                        this.activeSegments.add(segment);
+                        insertionIndex = this.activeSegments.indexOf(segment);
+                    }
 
-                    //check for intersection of new segments with lower neighbor
+                    //check for intersection of new segment with lower neighbour
                     try {
                         Segment lowerNeighbour = this.activeSegments.get(insertionIndex - 1);
                         checkForIntersectionAndAddEvent(lowerNeighbour, segment);
@@ -89,13 +94,17 @@ public class BentleyOttmannCrossingCalculator {
 
     private int getIndexForSegmentInsertion(Point point) {
         int index = 0;
+        boolean found = false;
         for (Segment segment : this.activeSegments) {
             Rational y = segment.isVertical() ? segment.getStartY() : Rational.plus(Rational.times(segment.getA(), point.x()), segment.getB());
-            index = this.activeSegments.indexOf(segment) + 1;
-            if (!Rational.lesserEqual(point.y(), y)) {
+            index = this.activeSegments.indexOf(segment);
+            if (Rational.lesserEqual(point.y(), y) && !Rational.equals(point.y(), y)) {
+                found = true;
                 break;
             }
         }
+        //new segment shall be inserted at the end
+        index = found ? index : -1;
         return index;
     }
 
@@ -149,12 +158,6 @@ public class BentleyOttmannCrossingCalculator {
             Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment));
             this.eventQueue.add(newStartEvent);
             this.eventQueue.add(newEndEvent);
-            //if (!this.eventQueue.contains(newStartEvent)) {
-            //    this.eventQueue.add(newStartEvent);
-            //}
-            //if (!this.eventQueue.contains(newEndEvent)) {
-            //    this.eventQueue.add(newEndEvent);
-            //}
         }
     }
 
