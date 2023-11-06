@@ -63,7 +63,7 @@ public class TestAlgorithms {
         CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
         int oldnumCrossings = cc.computeCrossingNumber();
         // Display the result!
-        System.out.println("Test 1: old: " + oldnumCrossings + "new: "+ numCrossings);
+        System.out.println("Test 1: old: " + oldnumCrossings + " new: "+ numCrossings);
 
 
 
@@ -96,7 +96,7 @@ public class TestAlgorithms {
         cc = new CrossingCalculator(g,vertexCoordinates);
         oldnumCrossings = cc.computeCrossingNumber();
         // Display the result!
-        System.out.println("Test 2: old: " + oldnumCrossings + "new: "+ numCrossings);
+        System.out.println("Test 2: old: " + oldnumCrossings + " new: "+ numCrossings);
 
 
 
@@ -111,11 +111,13 @@ public class TestAlgorithms {
         Coordinate c = new Coordinate(0,0);
         for (Vertex v : u){
             Random r =  new Random();
+            do
             {
                 c = new Coordinate(r.nextInt(width),r.nextInt(height));
             }
             while (usedCoordinates[c.getX()][c.getY()]!=0);
             vertexCoordinates.put(v,c);
+            System.out.println("X: " + c.getX() + " Y: "+ c.getY());
         }
 
         bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
@@ -124,7 +126,7 @@ public class TestAlgorithms {
         cc = new CrossingCalculator(g,vertexCoordinates);
         oldnumCrossings = cc.computeCrossingNumber();
         // Display the result!
-        System.out.println("Random Test: old: " + oldnumCrossings + "new: "+ numCrossings);
+        System.out.println("Random Test: old: " + oldnumCrossings + " new: "+ numCrossings);
 
 
     }
