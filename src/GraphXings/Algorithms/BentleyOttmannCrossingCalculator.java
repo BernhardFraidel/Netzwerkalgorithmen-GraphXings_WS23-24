@@ -103,8 +103,11 @@ public class BentleyOttmannCrossingCalculator {
     private void initialize() {
         intersections = 0;
         //init queue
-        //the queue orders the events after the x point, then after the y point
-        //and finally after the direction of the segments in case the events have the same coordinates
+        //the queue orders the events after the following priority:
+        // 1. the x coordinate of the points
+        // 2. the y coordinate of the point
+        // 3. the direction of the segments
+        // 4. the event type (INTERSECTION > {START|END})
         this.eventQueue = new PriorityQueue<>((o1, o2) -> {
             if (!Rational.lesserEqual(o1.point.x(), o2.point.x())) return 1;
             else if (Rational.lesserEqual(o1.point.x(), o2.point.x()) && !Rational.equals(o1.point.x(), o2.point.x()))
@@ -116,7 +119,11 @@ public class BentleyOttmannCrossingCalculator {
                 else {
                     Segment o1Segment = o1.segments.get(0);
                     Segment o2Segment = o2.segments.get(0);
-                    if (o1Segment.getEndY().equals(o2Segment.getEndY())) return 0;
+                    if (o1Segment.getEndY().equals(o2Segment.getEndY())) {
+                        if (o1.eventType == EventType.INTERSECTION) return -1;
+                        else if (o2.eventType == EventType.INTERSECTION) return 1;
+                        else return 0;
+                    }
                     else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
                     else return 1;
                 }
@@ -129,7 +136,12 @@ public class BentleyOttmannCrossingCalculator {
         for (Edge edge : g.getEdges()) {
             Coordinate tCoordinate = vertexCoordinates.get(edge.getT());
             Coordinate sCoordinate = vertexCoordinates.get(edge.getS());
-            Coordinate start = tCoordinate.getX() < sCoordinate.getX() ? tCoordinate : sCoordinate;
+            Coordinate start;
+            if (tCoordinate.getX() < sCoordinate.getX() || (tCoordinate.getX() == sCoordinate.getX() && tCoordinate.getY() < sCoordinate.getY())) {
+                start = tCoordinate;
+            } else {
+                start = sCoordinate;
+            }
             Coordinate end = start.equals(tCoordinate) ? sCoordinate : tCoordinate;
 
             Segment segment = new Segment(start, end);
