@@ -116,8 +116,9 @@ public class TestAlgorithms {
                 c = new Coordinate(r.nextInt(width),r.nextInt(height));
             }
             while (usedCoordinates[c.getX()][c.getY()]!=0);
+            usedCoordinates[c.getX()][c.getY()] = 1;
             vertexCoordinates.put(v,c);
-            System.out.println("X: " + c.getX() + " Y: "+ c.getY());
+            System.out.println("id: "+ v.getId() +" X: " + c.getX() + " Y: "+ c.getY());
         }
 
         bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
