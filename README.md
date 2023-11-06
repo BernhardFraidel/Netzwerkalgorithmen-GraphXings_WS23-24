@@ -19,3 +19,13 @@ The structure of the package GraphXings is as follows:
 - The main function is contained in GraphXings.java. It creates a 10-cycle and instantiates a game with two random players. Then it lets them play against each other and displays the result.
 
 If you want to implement a new player, your starting point is the interface Player in Package Algorithms.
+
+### Ideen zur Verbesserung der Performance
+#### Crossings schneller/besser berechnen
+-[x] C:CrossingCalculator Brute Force alle edges einzeln durchgehen O(n²)
+- [ ] Bentley–Ottmann O((n+k)log n)
+-[ ] J.Balaban An optimal algorithm for finding segments intersections O(N logN N + K)
+#### Nicht alle möglichen positionen sampeln 
+-[ ] zufällig x viele wählen und bestes nehmen
+-[ ] fläche in grid aufteilen und immer nur ein sampel aus jedem grid feld
+-[ ] für den minimierer: wenn crossingcalc >= der bisher gefundenen corssing => continue with next vertex/position  

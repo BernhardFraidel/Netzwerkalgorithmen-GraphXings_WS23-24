@@ -90,7 +90,7 @@ public class BentleyOttmannCrossingCalculator {
     private int getIndexForSegmentInsertion(Point point) {
         int index = 0;
         for (Segment segment : this.activeSegments) {
-            Rational y = Rational.plus(Rational.times(segment.getA(), point.x()), segment.getB());
+            Rational y = segment.isVertical() ? segment.getStartY() : Rational.plus(Rational.times(segment.getA(), point.x()), segment.getB());
             index = this.activeSegments.indexOf(segment) + 1;
             if (!Rational.lesserEqual(point.y(), y)) {
                 break;
