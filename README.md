@@ -58,15 +58,13 @@ given crossing calculator (O(n*n) -> O((n+k)log n).
 Don't look at the whole graph, only consider the x interval in which the newly 
 added segments lay.
 
-
-
 ### Ideen zur Verbesserung der Performance
 #### Crossings schneller/besser berechnen
--[ ] J.Balaban An optimal algorithm for finding segments intersections O(N logN N + K)
+- J.Balaban An optimal algorithm for finding segments intersections O(N logN N + K)
 #### Nicht alle möglichen positionen sampeln 
--[ ] zufällig x viele wählen und bestes nehmen
--[ ] fläche in grid aufteilen und immer nur ein sampel aus jedem grid feld
--[ ] für den minimierer: wenn crossingcalc >= der bisher gefundenen corssing => continue with next vertex/position
+- zufällig x viele wählen und bestes nehmen
+- fläche in grid aufteilen und immer nur ein sampel aus jedem grid feld
+- für den minimierer: wenn crossingcalc >= der bisher gefundenen corssing => continue with next vertex/position
 
 
 Idee:
