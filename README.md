@@ -20,12 +20,66 @@ The structure of the package GraphXings is as follows:
 
 If you want to implement a new player, your starting point is the interface Player in Package Algorithms.
 
+
+# Player
+Following is a short overview of the different implemented palyers
+## BruteForcePlayer
+This player tries to place every free vertex on all free coordinates 
+and records in how many crossings the vertex and coordinate results.
+For the minimizer one vertex with a minimal set of crossings is selected.
+For the maximizer one vertex with the maximium possible crossings in the current instance of the graph is chosen.
+
+**Pro:** 
+- The minimal and maximal number of crossings for the current graph is found.
+
+**Con:**
+- Since every free vertex needs to be checked for every coordinate we have a poor runtime
+  - Runtime: **O(n\*m)** where n = #vertices, m = #coordinates
+
+# GridPlayer
+- sample 10 random vertices 
+  - **Optional**: include neighbourhood of placed in sampling decision
+- Partition the field in a grid and sample:
+  - one random coordinate that lies in the tile 
+  - the one in the middle of the tile if free. if not search from middle outward.
+  - **Optional**: search in far away tiles for maximiser and in close tiles for minimizer
+    - only makes real sense when neighbours of placed nodes are sampled.
+
+# CrossingCalculator
+## BentleyOttmannCrossingCalculator
+In order to improve the runtime of native CrossingCalculator, we implemented 
+a crossing calculator using the Bentley-Ottman Algorithm. 
+
+It uses a sweep line approach to reduce the number of necessary comparisons 
+between segments which improves vastly on the expected runtime of the 
+given crossing calculator (O(n*n) -> O((n+k)log n).
+
+#### Possible improvement:
+Don't look at the whole graph, only consider the x interval in which the newly 
+added segments lay.
+
+
+
 ### Ideen zur Verbesserung der Performance
 #### Crossings schneller/besser berechnen
--[x] C:CrossingCalculator Brute Force alle edges einzeln durchgehen O(n²)
-- [ ] Bentley–Ottmann O((n+k)log n)
 -[ ] J.Balaban An optimal algorithm for finding segments intersections O(N logN N + K)
 #### Nicht alle möglichen positionen sampeln 
 -[ ] zufällig x viele wählen und bestes nehmen
 -[ ] fläche in grid aufteilen und immer nur ein sampel aus jedem grid feld
--[ ] für den minimierer: wenn crossingcalc >= der bisher gefundenen corssing => continue with next vertex/position  
+-[ ] für den minimierer: wenn crossingcalc >= der bisher gefundenen corssing => continue with next vertex/position
+
+
+Idee:
+Feld in Grid unterteilen:
+- aus jedem grid nur eine position sampeln
+  - potentiell random
+  - potentiell von der mitte starten und wenn nicht frei kreisförmig drum rum suchen
+- Nicht jedes grid feld sampeln
+  - distanz von nachbarknoten
+    - weit weg für maximierer
+    - nach für minimierer
+- unterscheidung zwischen maximierer und minimierer
+
+Nicht jeden Knoten sampeln:
+- nachbarn zu gesetzten knoten gesondert betrachten
+- welche Knoten liegen zwischen den gesetzten knoten
