@@ -23,6 +23,7 @@ public class BentleyOttmannCrossingCalculator {
     public int calculate() {
         initialize();
 
+        //main loop
         while (!this.eventQueue.isEmpty()) {
             Event event = this.eventQueue.poll();
             Segment segment = event.segments.get(0);
@@ -76,6 +77,18 @@ public class BentleyOttmannCrossingCalculator {
 
                     //swap intersecting segments (in activeSegments list)
                     Collections.swap(this.activeSegments, lowerIndex, upperIndex);
+
+                    //check for intersections with new neighbours
+                    try {
+                        Segment lowerNeighbour = this.activeSegments.get(lowerIndex - 1);
+                        checkForIntersectionAndAddEvent(lowerNeighbour, upperSegment);
+                    } catch (IndexOutOfBoundsException ignored) {
+                    }
+                    try {
+                        Segment upperNeighbour = this.activeSegments.get(upperIndex + 1);
+                        checkForIntersectionAndAddEvent(segment, upperNeighbour);
+                    } catch (IndexOutOfBoundsException ignored) {
+                    }
                 }
                 default -> {
                 }
@@ -88,7 +101,9 @@ public class BentleyOttmannCrossingCalculator {
     private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2) {
         Segment.getIntersection(segment1, segment2).ifPresent(point -> {
             Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
-            this.eventQueue.add(newEvent);
+            if (!this.eventQueue.contains(newEvent)) {
+                this.eventQueue.add(newEvent);
+            }
         });
     }
 
@@ -116,7 +131,7 @@ public class BentleyOttmannCrossingCalculator {
         // 1. the x coordinate of the points
         // 2. the y coordinate of the point
         // 3. the direction of the segments
-        // 4. the event type (INTERSECTION > {START|END})
+        // 4. the event type (INTERSECTION -> START -> END)
         this.eventQueue = new PriorityQueue<>((o1, o2) -> {
             if (!Rational.lesserEqual(o1.point.x(), o2.point.x())) return 1;
             else if (Rational.lesserEqual(o1.point.x(), o2.point.x()) && !Rational.equals(o1.point.x(), o2.point.x()))
@@ -129,11 +144,15 @@ public class BentleyOttmannCrossingCalculator {
                     Segment o1Segment = o1.segments.get(0);
                     Segment o2Segment = o2.segments.get(0);
                     if (o1Segment.getEndY().equals(o2Segment.getEndY())) {
+                        //FIXME: mehrere intersection events in einem Punkt --> richtige Reihenfolge?
                         if (o1.eventType == EventType.INTERSECTION) return -1;
                         else if (o2.eventType == EventType.INTERSECTION) return 1;
-                        else return 0;
-                    }
-                    else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
+                        else {
+                            if (o1.eventType == EventType.SEGMENT_START) return -1;
+                            else if (o2.eventType == EventType.SEGMENT_START) return 1;
+                            else return 0;
+                        }
+                    } else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
                     else return 1;
                 }
             }
@@ -163,6 +182,15 @@ public class BentleyOttmannCrossingCalculator {
 
 
     private record Event(Point point, EventType eventType, List<Segment> segments) {
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Event event) {
+                return event.eventType == this.eventType
+                        && new HashSet<>(event.segments).equals(new HashSet<>(this.segments))
+                        && event.point.equals(this.point);
+            }
+            return false;
+        }
     }
 
 

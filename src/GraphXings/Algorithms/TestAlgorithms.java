@@ -6,7 +6,6 @@ import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 
 public class TestAlgorithms {
@@ -59,6 +58,7 @@ public class TestAlgorithms {
         }
         BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
         int numCrossings = bocc.calculate();
+//        int numCrossings = 0;
 
         CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
         int oldnumCrossings = cc.computeCrossingNumber();
@@ -98,8 +98,7 @@ public class TestAlgorithms {
         // Display the result!
         System.out.println("Test 2: old: " + oldnumCrossings + " new: "+ numCrossings);
 
-
-
+        test3(g);
 
         vertexCoordinates = new HashMap<>();
         int[][] usedCoordinates = new int[width][height];
@@ -130,5 +129,38 @@ public class TestAlgorithms {
         System.out.println("Random Test: old: " + oldnumCrossings + " new: "+ numCrossings);
 
 
+    }
+
+    private static void test3(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()){
+                // Segment 1
+                case "0" -> new Coordinate(0, 7);
+                case "1" -> new Coordinate(2, 0);
+                // Segment 2
+                case "2" -> new Coordinate(0, 3);
+                case "3" -> new Coordinate(8, 6);
+                // Segment 3
+                case "4" -> new Coordinate(0, 5);
+                case "5" -> new Coordinate(8, 2);
+                // Segment 4
+                case "6" -> new Coordinate(1, 6);
+                case "7" -> new Coordinate(7, 4);
+                // Segment 5
+                case "8" -> new Coordinate(5, 1);
+                case "9" -> new Coordinate(8, 5);
+                default -> null;
+            };
+            vertexCoordinates.put(v,c);
+
+        }
+        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
+        int numCrossings = bocc.calculate();
+
+        CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
+        int oldNumCrossings = cc.computeCrossingNumber();
+        // Display the result!
+        System.out.println("Test 3: old: " + oldNumCrossings + " new: "+ numCrossings);
     }
 }
