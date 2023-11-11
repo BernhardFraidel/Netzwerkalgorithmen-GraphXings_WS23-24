@@ -32,7 +32,20 @@ public class BetterThanRandomPlayer implements Player
     @Override
     public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
     {   
-        Random r = new Random();
+        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, true);
+    }
+    
+
+    @Override
+    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
+    {
+        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, false);
+    }
+
+
+private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, boolean maximize)
+{
+      Random r = new Random();
         int stillToBePlaced = g.getN()- placedVertices.size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;
@@ -75,7 +88,11 @@ public class BetterThanRandomPlayer implements Player
 
         else
             {   
-                int maxNumCrossings = 0;
+                int maxOrMinNumCrossings = 0;
+                if(!maximize)
+                {
+                    maxOrMinNumCrossings = Integer.MAX_VALUE;
+                }
                 int bestPossibleX = 0;
                 int bestPossibleY = 0;
 
@@ -83,26 +100,41 @@ public class BetterThanRandomPlayer implements Player
                 {   
 
 
-                    for(int y=1; y<height; y++)
+                    for(int y=0; y<height; y++)
                     {
-                        HashMap<Vertex,Coordinate>vertexCoordinatesCopy = vertexCoordinates;
 
                         if(usedCoordinates[x][y]==0)
                         {
                             Coordinate c_temp = new Coordinate(x, y);
-                            vertexCoordinatesCopy.put(v,c_temp);
+                            vertexCoordinates.put(v,c_temp);
 
-                            Graph gPrime = graphWithPlacedVertices(g, vertexCoordinatesCopy);
+                            Graph gPrime = graphWithPlacedVertices(g, vertexCoordinates);
 
-                            CrossingCalculator cc = new CrossingCalculator(gPrime, vertexCoordinatesCopy);
+                            CrossingCalculator cc = new CrossingCalculator(gPrime, vertexCoordinates);
                             int numCrossings = cc.computeCrossingNumber();
 
-                            if(numCrossings > maxNumCrossings)
-                            {
-                                maxNumCrossings = numCrossings;
-                                bestPossibleX = x;
-                                bestPossibleY = y;
+                            vertexCoordinates.remove(v,c_temp);
+                            if(maximize)
+                            {   
+                                if(numCrossings >= maxOrMinNumCrossings)
+                                {
+                                    maxOrMinNumCrossings = numCrossings;
+                                    bestPossibleX = x;
+                                    bestPossibleY = y;
+                                }
+        
                             }
+        
+                            else
+                            {
+                                if(numCrossings <= maxOrMinNumCrossings)
+                                {
+                                    maxOrMinNumCrossings = numCrossings;
+                                    bestPossibleX = x;
+                                    bestPossibleY = y;
+                                }
+                                        
+                            } 
             
                         }
 
@@ -110,96 +142,14 @@ public class BetterThanRandomPlayer implements Player
                 }
 
             Coordinate c_final = new Coordinate(bestPossibleX, bestPossibleY);
+            //System.out.printf("Coordinates found: (%d/%d)\n",bestPossibleX, bestPossibleY);
             return new GameMove(v, c_final);
         }
       
     }
     
 
-    @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
-    {
-        Random r = new Random();
-        int stillToBePlaced = g.getN()- placedVertices.size();
-        int next = r.nextInt(stillToBePlaced);
-        int skipped = 0;
-        Vertex v=null;
-        for (Vertex u : g.getVertices())
-        {
-            if (!placedVertices.contains(u))
-            {
-                if (skipped < next)
-                {
-                    skipped++;
-                    continue;
-                }
-                v=u;
-                break;
-            }
-        }
-
-
-        if (vertexCoordinates.size()<3)
-            {         
-                Random randomX = new Random();
-                Random randomY = new Random();
-                
-                int rX = randomX.nextInt(width);
-                int rY = randomY.nextInt(height);
-
-
-                while(usedCoordinates[rX][rY]==1)
-                {
-                    rX = randomX.nextInt(width);
-                    rY = randomY.nextInt(height);
-                }
-
-                Coordinate c = new Coordinate(rX, rY);
-                return new GameMove(v, c);
-                
-
-            }
-
-        else
-            {   
-                int minNumCrossings = Integer.MAX_VALUE;
-                int bestPossibleX = 0;
-                int bestPossibleY = 0;
-
-                for (int x= 0; x<width; x++)
-                {   
-
-
-                    for(int y=0; y<height; y++)
-                        {
-                        HashMap<Vertex,Coordinate>vertexCoordinatesCopy = vertexCoordinates;
-
-                        if(usedCoordinates[x][y]==0)
-                        {
-                            Coordinate c_temp = new Coordinate(x, y);
-                            vertexCoordinatesCopy.put(v,c_temp);
-
-                            Graph gPrime = graphWithPlacedVertices(g, vertexCoordinatesCopy);
-
-                            CrossingCalculator cc = new CrossingCalculator(gPrime, vertexCoordinatesCopy);
-                            int numCrossings = cc.computeCrossingNumber();
-
-                            if(numCrossings < minNumCrossings)
-                            {
-                                minNumCrossings = numCrossings;
-                                bestPossibleX = x;
-                                bestPossibleY = y;
-                            }
-            
-                    }
-
-                }
-            }
-
-            Coordinate c_final = new Coordinate(bestPossibleX, bestPossibleY);
-            return new GameMove(v, c_final);
-    }
-}
+   
    /**
     * Creates a graph with only such vertices of input graph g
     * that have already been positioned in course of the game.
@@ -243,4 +193,3 @@ public class BetterThanRandomPlayer implements Player
         return name;
     }
 }
-
