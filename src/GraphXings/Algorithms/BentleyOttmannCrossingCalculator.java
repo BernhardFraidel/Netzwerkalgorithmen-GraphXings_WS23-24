@@ -42,14 +42,14 @@ public class BentleyOttmannCrossingCalculator {
                     //check for intersection of new segment with lower neighbour
                     try {
                         Segment lowerNeighbour = this.activeSegments.get(insertionIndex - 1);
-                        checkForIntersectionAndAddEvent(lowerNeighbour, segment);
+                        checkForIntersectionAndAddEvent(lowerNeighbour, segment, event.point.x());
                     } catch (IndexOutOfBoundsException ignored) {
                     }
 
                     //same with upper neighbour
                     try {
                         Segment upperNeighbour = this.activeSegments.get(insertionIndex + 1);
-                        checkForIntersectionAndAddEvent(segment, upperNeighbour);
+                        checkForIntersectionAndAddEvent(segment, upperNeighbour, event.point.x());
                     } catch (IndexOutOfBoundsException ignored) {
                     }
                 }
@@ -59,7 +59,7 @@ public class BentleyOttmannCrossingCalculator {
                     try {
                         Segment lowerNeighbour = this.activeSegments.get(index - 1);
                         Segment upperNeighbour = this.activeSegments.get(index + 1);
-                        checkForIntersectionAndAddEvent(lowerNeighbour, upperNeighbour);
+                        checkForIntersectionAndAddEvent(lowerNeighbour, upperNeighbour, event.point.x());
                     } catch (IndexOutOfBoundsException ignored) {
                     }
 
@@ -94,8 +94,8 @@ public class BentleyOttmannCrossingCalculator {
                         Collections.reverse(this.activeSegments.subList(min, max));
 
                         //check for intersections of outer segments
-                        checkForIntersectionWithLowerNeighbour(this.activeSegments.get(min), min);
-                        checkForIntersectionWithUpperNeighbour(this.activeSegments.get(max), max);
+                        checkForIntersectionWithLowerNeighbour(this.activeSegments.get(min), min, event.point.x());
+                        checkForIntersectionWithUpperNeighbour(this.activeSegments.get(max), max, event.point.x());
                         break;
                     }
 
@@ -108,11 +108,16 @@ public class BentleyOttmannCrossingCalculator {
                     assert Math.abs(lowerIndex - upperIndex) == 1;
 
                     //swap intersecting segments (in activeSegments list)
-                    Collections.swap(this.activeSegments, lowerIndex, upperIndex);
+                    try {
+                        Collections.swap(this.activeSegments, lowerIndex, upperIndex);
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("???");
+                        e.printStackTrace();
+                    }
 
                     //check for intersections with new neighbours
-                    checkForIntersectionWithLowerNeighbour(upperSegment, lowerIndex);
-                    checkForIntersectionWithUpperNeighbour(segment, upperIndex);
+                    checkForIntersectionWithLowerNeighbour(upperSegment, lowerIndex, event.point.x());
+                    checkForIntersectionWithUpperNeighbour(segment, upperIndex, event.point.x());
                 }
                 default -> {
                 }
@@ -122,27 +127,27 @@ public class BentleyOttmannCrossingCalculator {
         return intersections;
     }
 
-    private void checkForIntersectionWithLowerNeighbour(Segment segment, int index) {
+    private void checkForIntersectionWithLowerNeighbour(Segment segment, int index, Rational minX) {
         try {
             Segment lowerNeighbour = this.activeSegments.get(index - 1);
-            checkForIntersectionAndAddEvent(lowerNeighbour, segment);
+            checkForIntersectionAndAddEvent(lowerNeighbour, segment, minX);
         } catch (IndexOutOfBoundsException ignored) {
         }
     }
 
-    private void checkForIntersectionWithUpperNeighbour(Segment segment, int index) {
+    private void checkForIntersectionWithUpperNeighbour(Segment segment, int index, Rational minX) {
         try {
             Segment upperNeighbour = this.activeSegments.get(index + 1);
-            checkForIntersectionAndAddEvent(segment, upperNeighbour);
+            checkForIntersectionAndAddEvent(segment, upperNeighbour, minX);
         } catch (IndexOutOfBoundsException ignored) {
         }
     }
 
 
-    private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2) {
+    private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2, Rational minX) {
         Segment.getIntersection(segment1, segment2).ifPresent(point -> {
             Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
-            if (!this.eventQueue.contains(newEvent)) {
+            if (!this.eventQueue.contains(newEvent) && (!Rational.lesserEqual(point.x(), minX) || Rational.equals(point.x(), minX))) {
                 this.eventQueue.add(newEvent);
             }
         });
@@ -185,7 +190,6 @@ public class BentleyOttmannCrossingCalculator {
                     Segment o1Segment = o1.segments.get(0);
                     Segment o2Segment = o2.segments.get(0);
                     if (o1Segment.getEndY().equals(o2Segment.getEndY())) {
-                        //FIXME: mehrere intersection events in einem Punkt --> richtige Reihenfolge?
                         if (o1.eventType == EventType.INTERSECTION) return -1;
                         else if (o2.eventType == EventType.INTERSECTION) return 1;
                         else {
