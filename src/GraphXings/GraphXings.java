@@ -4,6 +4,8 @@ import GraphXings.Algorithms.TestAlgorithms;
 
 public class GraphXings {
     public static void main(String[] args) {
-        TestAlgorithms.testBentleyOttman(10, 10, 10);
+        for (int i = 0; i < 10; i++) {
+            TestAlgorithms.testBentleyOttman(10, 10, 10);
+        }
     }
 }

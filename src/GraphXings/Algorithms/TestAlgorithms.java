@@ -5,11 +5,12 @@ import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
 public class TestAlgorithms {
-    public static void testBentleyOttman(int numVertices, int width, int height){
+    public static void testBentleyOttman(int numVertices, int width, int height) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
         //create and save first vertex
@@ -23,7 +24,7 @@ public class TestAlgorithms {
             Vertex newVertex = new Vertex(Integer.toString(i));
             g.addVertex(newVertex);
             //create edge between new vertex and previous vertex for every second vertex to create segments
-            if (i%2 == 1){
+            if (i % 2 == 1) {
                 Edge newEdge = new Edge(previousVertex, newVertex);
                 g.addEdge(newEdge);
             }
@@ -32,109 +33,69 @@ public class TestAlgorithms {
 
         }
 
-        Iterable<Vertex> u = g.getVertices();
+//        test1(g);
+//        test2(g);
+//        test3(g);
+        randomTest(g, width, height);
+    }
+
+    private static void test1(Graph g) {
         HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
-        for (Vertex v : u) {
-            Coordinate c = switch (v.getId()){
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
                 // Segment 1
-                case "0" -> new Coordinate(0,0);
-                case "1" -> new Coordinate(3,0);
+                case "0" -> new Coordinate(0, 0);
+                case "1" -> new Coordinate(3, 0);
                 // Segment 2
-                case "2" -> new Coordinate(2,1);
-                case "3" -> new Coordinate(4,1);
+                case "2" -> new Coordinate(2, 1);
+                case "3" -> new Coordinate(4, 1);
                 // Segment 3
-                case "4" -> new Coordinate(1,2);
-                case "5" -> new Coordinate(4,2);
+                case "4" -> new Coordinate(1, 2);
+                case "5" -> new Coordinate(4, 2);
                 // Segment 4
-                case "6" -> new Coordinate(5,0);
-                case "7" -> new Coordinate(5,2);
+                case "6" -> new Coordinate(5, 0);
+                case "7" -> new Coordinate(5, 2);
                 // Segment 5
-                case "8" -> new Coordinate(5,1);
-                case "9" -> new Coordinate(5,3);
+                case "8" -> new Coordinate(5, 1);
+                case "9" -> new Coordinate(5, 3);
                 default -> null;
             };
-            vertexCoordinates.put(v,c);
+            vertexCoordinates.put(v, c);
 
         }
-        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
-        int numCrossings = bocc.calculate();
-//        int numCrossings = 0;
+        test("1", g, vertexCoordinates);
+    }
 
-        CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
-        int oldnumCrossings = cc.computeCrossingNumber();
-        // Display the result!
-        System.out.println("Test 1: old: " + oldnumCrossings + " new: "+ numCrossings);
-
-
-
-        vertexCoordinates = new HashMap<>();
-        for (Vertex v : u) {
-            Coordinate c = switch (v.getId()){
+    private static void test2(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
                 // Segment 1
-                case "0" -> new Coordinate(0,0);
-                case "1" -> new Coordinate(2,2);
+                case "0" -> new Coordinate(0, 0);
+                case "1" -> new Coordinate(2, 2);
                 // Segment 2
-                case "2" -> new Coordinate(0,2);
-                case "3" -> new Coordinate(2,0);
+                case "2" -> new Coordinate(0, 2);
+                case "3" -> new Coordinate(2, 0);
                 // Segment 3
-                case "4" -> new Coordinate(4,0);
-                case "5" -> new Coordinate(6,2);
+                case "4" -> new Coordinate(4, 0);
+                case "5" -> new Coordinate(6, 2);
                 // Segment 4
-                case "6" -> new Coordinate(4,2);
-                case "7" -> new Coordinate(6,0);
+                case "6" -> new Coordinate(4, 2);
+                case "7" -> new Coordinate(6, 0);
                 // Segment 5
-                case "8" -> new Coordinate(4,1);
-                case "9" -> new Coordinate(6,1);
+                case "8" -> new Coordinate(4, 1);
+                case "9" -> new Coordinate(6, 1);
                 default -> null;
             };
-            vertexCoordinates.put(v,c);
-
+            vertexCoordinates.put(v, c);
         }
-        bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
-        numCrossings = bocc.calculate();
-
-        cc = new CrossingCalculator(g,vertexCoordinates);
-        oldnumCrossings = cc.computeCrossingNumber();
-        // Display the result!
-        System.out.println("Test 2: old: " + oldnumCrossings + " new: "+ numCrossings);
-
-        test3(g);
-
-        vertexCoordinates = new HashMap<>();
-        int[][] usedCoordinates = new int[width][height];
-        for(int i = 0; i < usedCoordinates.length; i++) {
-            for(int j = 0; j < usedCoordinates[i].length; j++) {
-                usedCoordinates[i][j] = 0;
-            }
-        }
-        Coordinate c = new Coordinate(0,0);
-        for (Vertex v : u){
-            Random r =  new Random();
-            do
-            {
-                c = new Coordinate(r.nextInt(width),r.nextInt(height));
-            }
-            while (usedCoordinates[c.getX()][c.getY()]!=0);
-            usedCoordinates[c.getX()][c.getY()] = 1;
-            vertexCoordinates.put(v,c);
-            System.out.println("id: "+ v.getId() +" X: " + c.getX() + " Y: "+ c.getY());
-        }
-
-        bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
-        numCrossings = bocc.calculate();
-
-        cc = new CrossingCalculator(g,vertexCoordinates);
-        oldnumCrossings = cc.computeCrossingNumber();
-        // Display the result!
-        System.out.println("Random Test: old: " + oldnumCrossings + " new: "+ numCrossings);
-
-
+        test("2", g, vertexCoordinates);
     }
 
     private static void test3(Graph g) {
         HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
         for (Vertex v : g.getVertices()) {
-            Coordinate c = switch (v.getId()){
+            Coordinate c = switch (v.getId()) {
                 // Segment 1
                 case "0" -> new Coordinate(0, 7);
                 case "1" -> new Coordinate(2, 0);
@@ -152,15 +113,39 @@ public class TestAlgorithms {
                 case "9" -> new Coordinate(8, 5);
                 default -> null;
             };
-            vertexCoordinates.put(v,c);
-
+            vertexCoordinates.put(v, c);
         }
-        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g,vertexCoordinates);
-        int numCrossings = bocc.calculate();
+        test("3", g, vertexCoordinates);
+    }
 
-        CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
+    private static void randomTest(Graph g, int width, int height) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        int[][] usedCoordinates = new int[width][height];
+        for (int[] usedCoordinate : usedCoordinates) {
+            Arrays.fill(usedCoordinate, 0);
+        }
+        Coordinate c;
+        for (Vertex v : g.getVertices()) {
+            Random r = new Random();
+            do {
+                c = new Coordinate(r.nextInt(width), r.nextInt(height));
+            } while (usedCoordinates[c.getX()][c.getY()] != 0);
+            usedCoordinates[c.getX()][c.getY()] = 1;
+            vertexCoordinates.put(v, c);
+            System.out.println("id: " + v.getId() + " X: " + c.getX() + " Y: " + c.getY());
+        }
+        test("random", g, vertexCoordinates);
+    }
+
+
+    private static void test(String testName, Graph g, HashMap<Vertex, Coordinate> vertexCoordinates) {
+        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g, vertexCoordinates);
+        int bentleyOttmannCrossings = bocc.calculate();
+
+        CrossingCalculator cc = new CrossingCalculator(g, vertexCoordinates);
         int oldNumCrossings = cc.computeCrossingNumber();
+        assert oldNumCrossings == bentleyOttmannCrossings : "Bentley-Ottmann fehlerhaft!";
         // Display the result!
-        System.out.println("Test 3: old: " + oldNumCrossings + " new: "+ numCrossings);
+        System.out.println("Test " + testName + ": old: " + oldNumCrossings + " new: " + bentleyOttmannCrossings);
     }
 }
