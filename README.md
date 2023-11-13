@@ -44,6 +44,8 @@ For the maximizer one vertex with the maximium possible crossings in the current
   - the one in the middle of the tile if free. if not search from middle outward.
   - **Optional**: search in far away tiles for maximiser and in close tiles for minimizer
     - only makes real sense when neighbours of placed nodes are sampled.
+- Minimizer:
+  - when vertex coordinate with zero crossings found => stop searching
 
 # CrossingCalculator
 ## BentleyOttmannCrossingCalculator

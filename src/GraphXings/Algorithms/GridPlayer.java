@@ -88,16 +88,21 @@ public class GridPlayer implements Player{
         int xUpper = tileWidth - 1;
         int yLower = 0;
         int yUpper = tileHeight - 1;
-        do {
-            randomGridCoordinates.add(getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates));
-            xLower = xUpper + 1;
-            yLower = yUpper + 1;
+        for (xLower = 0; xLower < width -1; xLower = xUpper + 1){
             xUpper = xUpper + tileWidth;
-            if (xUpper >= width){ xUpper = width -1; }
-            yUpper = yUpper + tileHeight;
-            if (yUpper >= height){ yUpper = height - 1; }
-        } while (xUpper < width - 1 || yUpper < height - 1 );
+            if (xUpper >= width){ xUpper = width - 1; }
+            yUpper = tileHeight - 1;
+            for (yLower = 0; yLower < height -1; yLower = yUpper + 1){
+                yUpper = yUpper + tileHeight;
+                if (yUpper >= height){ yUpper = height - 1; }
+                Coordinate gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
+                // skip if no free coordinate is found
+                if (gridCoordinate == null){ continue; }
+                randomGridCoordinates.add(gridCoordinate);
 
+            }
+        }
+        //System.out.println( " xLower: " + xLower + " xUpper: " + xUpper + " yLower: " + yLower + " yUpper: " + yUpper );
 
         return randomGridCoordinates;
     }
@@ -109,20 +114,29 @@ public class GridPlayer implements Player{
         int trys = 0;
         Coordinate tileCoordinate;
         do {
-            x = r.nextInt(xUpper + 1 - xLower) + xLower;
-            y = r.nextInt(yUpper + 1 - yLower) + yLower;
+            //int next = (xUpper + 1 - xLower) ;
+            //int random = r.nextInt(next);
+            //int xc = Math.toIntExact(random + xLower);
+            //System.out.println( " xLower: " + xLower + " xUpper: " + xUpper + " Interval: " + next + " xrandom: " + random + " xc: " + xc );
+            //int ynext = (yUpper + 1 - yLower) ;
+            //int yrandom = r.nextInt(next);
+            //int yc = Math.toIntExact(yrandom + yLower);
+            //System.out.println(" yLower: " + yLower + " yUpper: " + yUpper +  " yInterval: " + ynext + " yrandom: " + yrandom + " yc: " + yc);
+            x = Math.toIntExact(r.nextLong(xUpper + 1 - xLower) + xLower);
+            y = Math.toIntExact(r.nextLong(yUpper + 1 - yLower) + yLower);
             tileCoordinate = new Coordinate(x,y);
             trys = trys + 1;
         } while (usedCoordinates[x][y]!=0 || trys > 1000);
+    //TODO check null
 
         return tileCoordinate;
     }
 
     private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, Role role) {
-        int numVertices = 10;
+        int numVertices = 5;
         //TODO Define partitions depending on width and height parameter ?
-        int numHorizontalPartitions = 100;
-        int numVerticalPartitions = 100;
+        int numHorizontalPartitions = 50;
+        int numVerticalPartitions = 50;
         HashSet<Vertex> sampledVertices = sampleRandomVertices(numVertices, g, placedVertices);
         HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, usedCoordinates);
 
@@ -133,7 +147,6 @@ public class GridPlayer implements Player{
         }
         Vertex bestVertex = null;
         Coordinate bestCoordinate = null;
-
         for (Vertex v : sampledVertices){
             for (Coordinate c : randomGridCoordinates){
                 vertexCoordinates.put(v,c);
@@ -144,7 +157,9 @@ public class GridPlayer implements Player{
                 int numCrossings = cc.computeCrossingNumber();
 
                 vertexCoordinates.remove(v,c);
-
+                if (role == MIN && numCrossings == 0){
+                    return new GameMove(v,c);
+                }
                 if((role == MAX && numCrossings >= maxOrMinNumCrossings) || (role == MIN && numCrossings <= maxOrMinNumCrossings )) {
                     maxOrMinNumCrossings = numCrossings;
                     bestCoordinate = c;
