@@ -5,6 +5,7 @@ import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Data.Edge;
 import GraphXings.Game.GameMove;
+import GraphXings.Game.GameState;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,46 +14,81 @@ import java.util.Random;
 import java.lang.Iterable;
 
 
-public class BetterThanRandomPlayer implements Player
+public class NewBetterThanRandomPlayer implements NewPlayer
 {
-    /**
-     * The name of the player.
-     */
-    private String name;
+ 	/**
+	 * The name of the player.
+	 */
+	private String name;
 
-    /**
-     * Creates a player with the assigned name.
-     * @param name
-     */
-    public BetterThanRandomPlayer(String name)
+	/**
+	 * The graph to be drawn.
+	 */
+	private Graph g;
+	/**
+	 * The current state of the game;
+	 */
+	private GameState gs;
+	/**
+	 * The width of the game board.
+	 */
+	private int width;
+	/**
+	 * The height of the game board.
+	 */
+	private int height;
+	/**
+	 * Creates a player with the assigned name.
+	 * @param name
+	 */
+    public NewBetterThanRandomPlayer(String name)
     {
         this.name = name;
     }
 
     @Override
-    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
+    public GameMove maximizeCrossings(GameMove lastMove)
     {   
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, true);
-    }
     
+        if (lastMove != null)
+		{
+			gs.applyMove(lastMove);
+		}
+
+        GameMove newMove = selectMove(true);
+
+        gs.applyMove(newMove);
+
+        return newMove;
+    
+    }
 
     @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
+    public GameMove minimizeCrossings(GameMove lastMove)
     {
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, false);
+        if (lastMove != null)
+		{
+			gs.applyMove(lastMove);
+		}
+
+        GameMove newMove = selectMove(false);
+
+        gs.applyMove(newMove);
+
+        return newMove;
     }
 
 
-private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, boolean maximize)
+private GameMove selectMove(boolean maximize)
 {
       Random r = new Random();
-        int stillToBePlaced = g.getN()- placedVertices.size();
+        int stillToBePlaced = g.getN()- gs.getPlacedVertices().size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;
         Vertex v=null;
         for (Vertex u : g.getVertices())
         {
-            if (!placedVertices.contains(u))
+            if (!gs.getPlacedVertices().contains(u))
             {
                 if (skipped < next)
                 {
@@ -65,7 +101,7 @@ private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinat
         }
 
 
-        if (vertexCoordinates.size()<3)
+        if (gs.getVertexCoordinates().size()<3)
             {         
                 Random randomX = new Random();
                 Random randomY = new Random();
@@ -74,7 +110,7 @@ private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinat
                 int rY = randomY.nextInt(height);
 
 
-                while(usedCoordinates[rX][rY]==1)
+                while(gs.getUsedCoordinates()[rX][rY]==1)
                 {
                     rX = randomX.nextInt(width);
                     rY = randomY.nextInt(height);
@@ -103,17 +139,17 @@ private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinat
                     for(int y=0; y<height; y++)
                     {
 
-                        if(usedCoordinates[x][y]==0)
+                        if(gs.getUsedCoordinates()[x][y]==0)
                         {
                             Coordinate c_temp = new Coordinate(x, y);
-                            vertexCoordinates.put(v,c_temp);
+                            gs.getVertexCoordinates().put(v,c_temp);
 
-                            Graph gPrime = graphWithPlacedVertices(g, vertexCoordinates);
+                            Graph gPrime = graphWithPlacedVertices(g, gs.getVertexCoordinates());
 
-                            CrossingCalculator cc = new CrossingCalculator(gPrime, vertexCoordinates);
+                            CrossingCalculator cc = new CrossingCalculator(gPrime, gs.getVertexCoordinates());
                             int numCrossings = cc.computeCrossingNumber();
 
-                            vertexCoordinates.remove(v,c_temp);
+                            gs.getVertexCoordinates().remove(v,c_temp);
                             if(maximize)
                             {   
                                 if(numCrossings >= maxOrMinNumCrossings)
@@ -180,11 +216,6 @@ private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinat
 
     return gPrime;
 }
-@Override
-public void initializeNextRound(Graph g, int width, int height, Role role)
-{
-
-}
 
 
     @Override
@@ -192,4 +223,18 @@ public void initializeNextRound(Graph g, int width, int height, Role role)
     {
         return name;
     }
+
+    
+
+    @Override
+    public void initializeNextRound(Graph g, int width, int height, GraphXings.Algorithms.NewPlayer.Role role) {
+      
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.gs = new GameState(width, height);
+        
+    };
+
+    
 }

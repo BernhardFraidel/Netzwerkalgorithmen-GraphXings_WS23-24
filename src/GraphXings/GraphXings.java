@@ -4,12 +4,19 @@ import java.time.Instant;
 import java.time.Duration;
 
 import GraphXings.Algorithms.BetterThanRandomPlayer;
+import GraphXings.Algorithms.NewBetterThanRandomPlayer;
+import GraphXings.Algorithms.NewRandomPlayer;
+import GraphXings.Algorithms.NewPlayer;
+//import GraphXings.Algorithms.BetterThanRandomPlayer2;
+//import GraphXings.Algorithms.BruteForcePlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameResult;
+import GraphXings.Game.NewGame;
+import GraphXings.Game.NewGameResult;
 
 public class GraphXings
 {
@@ -90,12 +97,31 @@ public class GraphXings
         System.out.println(res.announceResult());
          */
 
-         for(int i=0; i<10;i++)
+         /* for(int i=0; i<10;i++)
          {  
             Instant start = Instant.now();
 
             Game game = new Game(gBig,w,h,new BetterThanRandomPlayer("BetterThanRandomPlayer"), new RandomPlayer("RandomPlayer"));
             GameResult res = game.play();
+            // Display the result!
+            System.out.println("\n");
+            System.out.println(res.announceResult());
+    
+            Instant finish = Instant.now();
+
+            long timeElapsed = Duration.between(start, finish).toMillis();
+            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds");
+
+            
+
+         } */
+
+         for(int i=0; i<3;i++)
+         {  
+            Instant start = Instant.now();
+
+            NewGame newGame = new NewGame(gBig, w,h,new NewBetterThanRandomPlayer("NewBetterThanRandomPlayer"), new NewRandomPlayer("NewRandomPlayer"));
+            NewGameResult res = newGame.play();
             // Display the result!
             System.out.println("\n");
             System.out.println(res.announceResult());
