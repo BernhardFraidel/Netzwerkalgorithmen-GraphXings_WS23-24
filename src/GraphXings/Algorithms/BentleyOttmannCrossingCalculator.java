@@ -168,7 +168,7 @@ public class BentleyOttmannCrossingCalculator {
             if (Rational.lesserEqual(point.y(), y)) {
                 //if equal to y of other segment:
                 // decide dependent of slope s.t. touching intersection event swaps the two segments correctly
-                if (Rational.equals(point.y(), y) && slope != null && Rational.lesserEqual(slope, segment.getA())) {
+                if (Rational.equals(point.y(), y) && slope != null && (segment.getA() == null || Rational.lesserEqual(slope, segment.getA()))) {
                     //slope of segment to be inserted is less (or equal) than slope of other segment
                     // so new segment gets inserted after other segment
                     index++;

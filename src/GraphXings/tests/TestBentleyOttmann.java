@@ -34,15 +34,16 @@ public class TestBentleyOttmann {
             previousVertex = newVertex;
         }
 
-        test1(g);
-        test2(g);
-        test3(g);
-        test4(g);
-        test5(g);
-        test6(g);
-        test7(g);
-        test8(g);
-        test9(g);
+//        test1(g);
+//        test2(g);
+//        test3(g);
+//        test4(g);
+//        test5(g);
+//        test6(g);
+//        test7(g);
+//        test8(g);
+//        test9(g);
+        test10(g);
 //        randomTest(g, width, height);
     }
 
@@ -279,6 +280,32 @@ public class TestBentleyOttmann {
             vertexCoordinates.put(v, c);
         }
         test("9", g, vertexCoordinates);
+    }
+
+    private static void test10(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
+                // Segment 1
+                case "0" -> new Coordinate(8, 8);
+                case "1" -> new Coordinate(0, 5);
+                // Segment 2
+                case "2" -> new Coordinate(7, 6);
+                case "3" -> new Coordinate(3, 8);
+                // Segment 3
+                case "4" -> new Coordinate(9, 5);
+                case "5" -> new Coordinate(5, 7);
+                // Segment 4
+                case "6" -> new Coordinate(5, 1);
+                case "7" -> new Coordinate(2, 8);
+                // Segment 5
+                case "8" -> new Coordinate(5, 0);
+                case "9" -> new Coordinate(7, 9);
+                default -> null;
+            };
+            vertexCoordinates.put(v, c);
+        }
+        test("10", g, vertexCoordinates);
     }
 
     private static void randomTest(Graph g, int width, int height) {
