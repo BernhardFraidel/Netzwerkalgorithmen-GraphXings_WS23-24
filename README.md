@@ -36,8 +36,8 @@ For the maximizer one vertex with the maximium possible crossings in the current
 - Since every free vertex needs to be checked for every coordinate we have a poor runtime
   - Runtime: **O(n\*m)** where n = #vertices, m = #coordinates
 
-# GridPlayer
-- sample 10 random vertices 
+## GridPlayer
+- sample 5 random vertices 
   - **Optional**: include neighbourhood of placed in sampling decision
 - Partition the field in a grid and sample:
   - one random coordinate that lies in the tile 
@@ -46,6 +46,21 @@ For the maximizer one vertex with the maximium possible crossings in the current
     - only makes real sense when neighbours of placed nodes are sampled.
 - Minimizer:
   - when vertex coordinate with zero crossings found => stop searching
+
+## DistancePlayer
+The Idea here is, that by placing vertices close to each other it is less likely for the random player to cross 
+an edge, with maximiser it's the opposite the longer the edges the higher the chance of a crossing.
+- find 1 random free neighbour of placed vertices
+- get random grid coordinates
+- check distance from current coordinate to grid coordinates
+- minimizer: 
+  - check 2 closest grid coordinates cossing numbers 
+  - place vertex as close as possible with minimal crossings
+- maximizer: 
+  - check 2 farthest grid coordinates crossing number 
+  - place Vertex as far away as possible with maximal crossings
+
+
 
 # CrossingCalculator
 ## BentleyOttmannCrossingCalculator
