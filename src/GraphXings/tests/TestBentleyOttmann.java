@@ -34,14 +34,16 @@ public class TestBentleyOttmann {
             previousVertex = newVertex;
         }
 
-//        test1(g);
-//        test2(g);
-//        test3(g);
-//        test4(g);
-//        test5(g);
-//        test6(g);
-//        test7(g);
-        randomTest(g, width, height);
+        test1(g);
+        test2(g);
+        test3(g);
+        test4(g);
+        test5(g);
+        test6(g);
+        test7(g);
+        test8(g);
+        test9(g);
+//        randomTest(g, width, height);
     }
 
     private static void test1(Graph g) {
@@ -225,6 +227,58 @@ public class TestBentleyOttmann {
             vertexCoordinates.put(v, c);
         }
         test("7", g, vertexCoordinates);
+    }
+
+    private static void test8(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
+                // Segment 1
+                case "0" -> new Coordinate(5, 0);
+                case "1" -> new Coordinate(7, 2);
+                // Segment 2
+                case "2" -> new Coordinate(9, 8);
+                case "3" -> new Coordinate(8, 5);
+                // Segment 3
+                case "4" -> new Coordinate(4, 5);
+                case "5" -> new Coordinate(1, 5);
+                // Segment 4
+                case "6" -> new Coordinate(8, 6);
+                case "7" -> new Coordinate(3, 3);
+                // Segment 5
+                case "8" -> new Coordinate(4, 6);
+                case "9" -> new Coordinate(4, 3);
+                default -> null;
+            };
+            vertexCoordinates.put(v, c);
+        }
+        test("8", g, vertexCoordinates);
+    }
+
+    private static void test9(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
+                // Segment 1
+                case "0" -> new Coordinate(5, 0);
+                case "1" -> new Coordinate(5, 5);
+                // Segment 2
+                case "2" -> new Coordinate(6, 9);
+                case "3" -> new Coordinate(1, 2);
+                // Segment 3
+                case "4" -> new Coordinate(5, 4);
+                case "5" -> new Coordinate(6, 5);
+                // Segment 4
+                case "6" -> new Coordinate(8, 3);
+                case "7" -> new Coordinate(1, 3);
+                // Segment 5
+                case "8" -> new Coordinate(7, 3);
+                case "9" -> new Coordinate(5, 3);
+                default -> null;
+            };
+            vertexCoordinates.put(v, c);
+        }
+        test("9", g, vertexCoordinates);
     }
 
     private static void randomTest(Graph g, int width, int height) {

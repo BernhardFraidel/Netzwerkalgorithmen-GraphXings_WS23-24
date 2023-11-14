@@ -9,6 +9,7 @@ public class BentleyOttmannCrossingCalculator {
     Graph g;
     HashMap<Vertex, Coordinate> vertexCoordinates;
     Queue<Event> eventQueue;
+    List<Event> processedEvents;
     List<Segment> activeSegments;
     int intersections;
 
@@ -27,6 +28,7 @@ public class BentleyOttmannCrossingCalculator {
         //main loop
         while (!this.eventQueue.isEmpty()) {
             Event event = this.eventQueue.poll();
+            this.processedEvents.add(event);
             Segment segment = event.segments.get(0);
             switch (event.eventType) {
                 case SEGMENT_START -> {
@@ -77,6 +79,7 @@ public class BentleyOttmannCrossingCalculator {
                         //remove all intersections at this point from the eventQueue
                         //(this event is already polled from the queue)
                         this.eventQueue.removeAll(intersectionEventsAtSamePoint);
+                        this.processedEvents.addAll(intersectionEventsAtSamePoint);
 
                         //swap the segments
                         Set<Integer> indicesOfSegments = intersectionEventsAtSamePoint
@@ -86,12 +89,13 @@ public class BentleyOttmannCrossingCalculator {
                                 .collect(Collectors.toSet());
                         indicesOfSegments.add(this.activeSegments.indexOf(segment));
                         indicesOfSegments.add(this.activeSegments.indexOf(upperSegment));
+                        //calculate n choose 2 where n is the number of segments intersecting in this point
                         int n = indicesOfSegments.size();
                         intersections += (((n - 1) * n) / 2);
                         int min = indicesOfSegments.stream().min(Integer::compareTo).orElse(-1);
                         int max = indicesOfSegments.stream().max(Integer::compareTo).orElse(-1);
                         assert min != -1 && max != -1;
-                        Collections.reverse(this.activeSegments.subList(min, max));
+                        Collections.reverse(this.activeSegments.subList(min, max + 1));
 
                         //check for intersections of outer segments
                         checkForIntersectionWithLowerNeighbour(this.activeSegments.get(min), min, event.point.x());
@@ -147,7 +151,8 @@ public class BentleyOttmannCrossingCalculator {
     private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2, Rational minX) {
         Segment.getIntersection(segment1, segment2).ifPresent(point -> {
             Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
-            if (!this.eventQueue.contains(newEvent) && (!Rational.lesserEqual(point.x(), minX) || Rational.equals(point.x(), minX))) {
+            if (!this.eventQueue.contains(newEvent) && (!Rational.lesserEqual(point.x(), minX) || Rational.equals(point.x(), minX))
+                    && !this.processedEvents.contains(newEvent)) {
                 this.eventQueue.add(newEvent);
             }
         });
@@ -184,8 +189,8 @@ public class BentleyOttmannCrossingCalculator {
         //the queue orders the events after the following priority:
         // 1. the x coordinate of the points
         // 2. the y coordinate of the point
-        // 3. the direction of the segments
-        // 4. the event type (INTERSECTION -> START -> END)
+        // 3. the event type (INTERSECTION -> START -> END)
+        // 4. the direction of the segments
         this.eventQueue = new PriorityQueue<>((o1, o2) -> {
             if (!Rational.lesserEqual(o1.point.x(), o2.point.x())) return 1;
             else if (Rational.lesserEqual(o1.point.x(), o2.point.x()) && !Rational.equals(o1.point.x(), o2.point.x()))
@@ -195,11 +200,11 @@ public class BentleyOttmannCrossingCalculator {
                 else if (Rational.lesserEqual(o1.point.y(), o2.point.y()) && !Rational.equals(o1.point.y(), o2.point.y()))
                     return -1;
                 else {
-                    if (o1.eventType == EventType.INTERSECTION) return -1;
-                    else if (o2.eventType == EventType.INTERSECTION) return 1;
+                    if (o1.eventType == EventType.SEGMENT_START) return -1;
+                    else if (o2.eventType == EventType.SEGMENT_START) return 1;
                     else {
-                        if (o1.eventType == EventType.SEGMENT_START) return -1;
-                        else if (o2.eventType == EventType.SEGMENT_START) return 1;
+                        if (o1.eventType == EventType.INTERSECTION) return -1;
+                        else if (o2.eventType == EventType.INTERSECTION) return 1;
                         else {
                             Segment o1Segment = o1.segments.get(0);
                             Segment o2Segment = o2.segments.get(0);
@@ -211,7 +216,7 @@ public class BentleyOttmannCrossingCalculator {
                 }
             }
         });
-
+        this.processedEvents = new ArrayList<>();
         this.activeSegments = new ArrayList<>();
 
         //for each edge, add events for start and end to eventQueue
