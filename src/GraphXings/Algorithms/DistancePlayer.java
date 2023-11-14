@@ -88,8 +88,8 @@ public class DistancePlayer implements Player{
 
     private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, Role role) {
         int numNeighbors = 2;
-        int numHorizontalPartitions = 50;
-        int numVerticalPartitions = 50;
+        int numHorizontalPartitions = 150;
+        int numVerticalPartitions = 150;
         // if there is no vertex choose at random
         if (placedVertices.isEmpty()){
             RandomPlayer randomPlayer = new RandomPlayer("rand");
