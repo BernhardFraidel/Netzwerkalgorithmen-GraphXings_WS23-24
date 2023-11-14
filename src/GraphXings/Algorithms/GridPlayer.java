@@ -85,14 +85,14 @@ public class GridPlayer implements Player{
 
         HashSet<Coordinate> randomGridCoordinates = new HashSet<>();
         int xLower = 0;
-        int xUpper = tileWidth - 1;
+        int xUpper = 0;
         int yLower = 0;
-        int yUpper = tileHeight - 1;
-        for (xLower = 0; xLower < width -1; xLower = xUpper + 1){
+        int yUpper = 0;
+        for (xLower = 0; xLower < width -1; xLower = xUpper){
             xUpper = xUpper + tileWidth;
             if (xUpper >= width){ xUpper = width - 1; }
-            yUpper = tileHeight - 1;
-            for (yLower = 0; yLower < height -1; yLower = yUpper + 1){
+            yUpper = 0;
+            for (yLower = 0; yLower < height -1; yLower = yUpper){
                 yUpper = yUpper + tileHeight;
                 if (yUpper >= height){ yUpper = height - 1; }
                 Coordinate gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
@@ -126,8 +126,8 @@ public class GridPlayer implements Player{
             y = Math.toIntExact(r.nextLong(yUpper + 1 - yLower) + yLower);
             tileCoordinate = new Coordinate(x,y);
             trys = trys + 1;
-        } while (usedCoordinates[x][y]!=0 || trys > 1000);
-    //TODO check null
+        } while (usedCoordinates[x][y]!=0 || trys < 1000);
+        //TODO check null
 
         return tileCoordinate;
     }
