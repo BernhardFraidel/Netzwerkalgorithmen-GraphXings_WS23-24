@@ -31,7 +31,7 @@ public class BentleyOttmannCrossingCalculator {
             switch (event.eventType) {
                 case SEGMENT_START -> {
                     //insert new segments at correct position
-                    int insertionIndex = getIndexForSegmentInsertion(event.point);
+                    int insertionIndex = getIndexForSegmentInsertion(event.point, segment.getA());
                     if (insertionIndex != -1) {
                         this.activeSegments.add(insertionIndex, segment);
                     } else {
@@ -105,7 +105,7 @@ public class BentleyOttmannCrossingCalculator {
                     int upperIndex = this.activeSegments.indexOf(upperSegment);
 
                     //the two segments must be neighbors
-                    assert Math.abs(lowerIndex - upperIndex) == 1;
+                    assert Math.abs(lowerIndex - upperIndex) == 1 : "intersection not between neighbours!";
 
                     //swap intersecting segments (in activeSegments list)
                     try {
@@ -153,13 +153,21 @@ public class BentleyOttmannCrossingCalculator {
         });
     }
 
-    private int getIndexForSegmentInsertion(Point point) {
+    private int getIndexForSegmentInsertion(Point point, Rational slope) {
         int index = 0;
         boolean found = false;
         for (Segment segment : this.activeSegments) {
             Rational y = segment.isVertical() ? segment.getStartY() : Rational.plus(Rational.times(segment.getA(), point.x()), segment.getB());
             index = this.activeSegments.indexOf(segment);
-            if (Rational.lesserEqual(point.y(), y) && !Rational.equals(point.y(), y)) {
+            //shift if event point is less than y of other segment
+            if (Rational.lesserEqual(point.y(), y)) {
+                //if equal to y of other segment:
+                // decide dependent of slope s.t. touching intersection event swaps the two segments correctly
+                if (Rational.equals(point.y(), y) && slope != null && Rational.lesserEqual(slope, segment.getA())) {
+                    //slope of segment to be inserted is less (or equal) than slope of other segment
+                    // so new segment gets inserted after other segment
+                    index++;
+                }
                 found = true;
                 break;
             }
@@ -187,18 +195,19 @@ public class BentleyOttmannCrossingCalculator {
                 else if (Rational.lesserEqual(o1.point.y(), o2.point.y()) && !Rational.equals(o1.point.y(), o2.point.y()))
                     return -1;
                 else {
-                    Segment o1Segment = o1.segments.get(0);
-                    Segment o2Segment = o2.segments.get(0);
-                    if (o1Segment.getEndY().equals(o2Segment.getEndY())) {
-                        if (o1.eventType == EventType.INTERSECTION) return -1;
-                        else if (o2.eventType == EventType.INTERSECTION) return 1;
+                    if (o1.eventType == EventType.INTERSECTION) return -1;
+                    else if (o2.eventType == EventType.INTERSECTION) return 1;
+                    else {
+                        if (o1.eventType == EventType.SEGMENT_START) return -1;
+                        else if (o2.eventType == EventType.SEGMENT_START) return 1;
                         else {
-                            if (o1.eventType == EventType.SEGMENT_START) return -1;
-                            else if (o2.eventType == EventType.SEGMENT_START) return 1;
-                            else return 0;
+                            Segment o1Segment = o1.segments.get(0);
+                            Segment o2Segment = o2.segments.get(0);
+                            if (o1Segment.getEndY().equals(o2Segment.getEndY())) return 0;
+                            else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
+                            else return 1;
                         }
-                    } else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
-                    else return 1;
+                    }
                 }
             }
         });

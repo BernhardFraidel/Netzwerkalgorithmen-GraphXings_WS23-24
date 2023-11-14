@@ -1,11 +1,11 @@
 package GraphXings;
 
-import GraphXings.Algorithms.TestAlgorithms;
+import GraphXings.tests.TestBentleyOttmann;
 
 public class GraphXings {
     public static void main(String[] args) {
         for (int i = 0; i < 10; i++) {
-            TestAlgorithms.testBentleyOttman(10, 10, 10);
+            TestBentleyOttmann.testBentleyOttman(10, 10, 10);
         }
     }
 }

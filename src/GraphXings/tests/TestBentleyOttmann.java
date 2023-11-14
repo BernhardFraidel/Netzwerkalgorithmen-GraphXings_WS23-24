@@ -1,5 +1,7 @@
-package GraphXings.Algorithms;
+package GraphXings.tests;
 
+import GraphXings.Algorithms.BentleyOttmannCrossingCalculator;
+import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -9,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-public class TestAlgorithms {
+public class TestBentleyOttmann {
     public static void testBentleyOttman(int numVertices, int width, int height) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
@@ -37,6 +39,8 @@ public class TestAlgorithms {
 //        test3(g);
 //        test4(g);
 //        test5(g);
+//        test6(g);
+//        test7(g);
         randomTest(g, width, height);
     }
 
@@ -169,6 +173,58 @@ public class TestAlgorithms {
             vertexCoordinates.put(v, c);
         }
         test("5", g, vertexCoordinates);
+    }
+
+    private static void test6(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
+                // Segment 1
+                case "0" -> new Coordinate(1, 8);
+                case "1" -> new Coordinate(8, 3);
+                // Segment 2
+                case "2" -> new Coordinate(4, 5);
+                case "3" -> new Coordinate(1, 7);
+                // Segment 3
+                case "4" -> new Coordinate(6, 5);
+                case "5" -> new Coordinate(8, 5);
+                // Segment 4
+                case "6" -> new Coordinate(3, 1);
+                case "7" -> new Coordinate(5, 8);
+                // Segment 5
+                case "8" -> new Coordinate(5, 3);
+                case "9" -> new Coordinate(2, 0);
+                default -> null;
+            };
+            vertexCoordinates.put(v, c);
+        }
+        test("6", g, vertexCoordinates);
+    }
+
+    private static void test7(Graph g) {
+        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
+        for (Vertex v : g.getVertices()) {
+            Coordinate c = switch (v.getId()) {
+                // Segment 1
+                case "0" -> new Coordinate(0, 7);
+                case "1" -> new Coordinate(9, 4);
+                // Segment 2
+                case "2" -> new Coordinate(3, 0);
+                case "3" -> new Coordinate(5, 8);
+                // Segment 3
+                case "4" -> new Coordinate(4, 4);
+                case "5" -> new Coordinate(0, 5);
+                // Segment 4
+                case "6" -> new Coordinate(4, 3);
+                case "7" -> new Coordinate(9, 3);
+                // Segment 5
+                case "8" -> new Coordinate(6, 4);
+                case "9" -> new Coordinate(2, 7);
+                default -> null;
+            };
+            vertexCoordinates.put(v, c);
+        }
+        test("7", g, vertexCoordinates);
     }
 
     private static void randomTest(Graph g, int width, int height) {
