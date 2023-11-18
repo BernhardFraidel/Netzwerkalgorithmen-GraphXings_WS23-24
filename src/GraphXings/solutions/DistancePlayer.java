@@ -1,5 +1,7 @@
-package GraphXings.Algorithms;
+package GraphXings.solutions;
 
+import GraphXings.Algorithms.Player;
+import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -12,7 +14,7 @@ import java.util.*;
 import static GraphXings.Algorithms.Player.Role.MAX;
 import static GraphXings.Algorithms.Player.Role.MIN;
 
-public class DistancePlayer implements Player{
+public class DistancePlayer implements Player {
     /**
      * The name of the player.
      */
@@ -35,7 +37,7 @@ public class DistancePlayer implements Player{
     {
         return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, MIN);
     }
-    public double distance(Coordinate a, Coordinate b){
+    public double distance(Coordinate a, Coordinate b) {
         double ac = Math.abs(b.getY() - a.getY());
         double cb = Math.abs(b.getX() - a.getX());
         return Math.hypot(ac, cb);

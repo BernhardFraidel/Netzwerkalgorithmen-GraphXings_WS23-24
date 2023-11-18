@@ -1,6 +1,6 @@
 package GraphXings;
 
-import GraphXings.Algorithms.BruteForcePlayer;
+import GraphXings.solutions.BruteForcePlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;

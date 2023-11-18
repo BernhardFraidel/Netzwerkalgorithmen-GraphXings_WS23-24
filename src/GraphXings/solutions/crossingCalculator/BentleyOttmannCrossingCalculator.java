@@ -1,4 +1,4 @@
-package GraphXings.Algorithms;
+package GraphXings.solutions.crossingCalculator;
 
 import GraphXings.Data.*;
 

@@ -1,12 +1,13 @@
-package GraphXings.Algorithms;
+package GraphXings.tests;
 
+import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
+import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculator;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 
 public class TestAlgorithms {
