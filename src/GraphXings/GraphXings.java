@@ -1,12 +1,12 @@
 package GraphXings;
 
-import GraphXings.solutions.BruteForcePlayer;
-import GraphXings.Algorithms.RandomPlayer;
+import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-import GraphXings.Game.Game;
-import GraphXings.Game.GameResult;
+import GraphXings.Game.NewGame;
+import GraphXings.Game.NewGameResult;
+import GraphXings.solutions.GridPlayer;
 
 public class GraphXings {
     public static void main(String[] args) {
@@ -33,9 +33,9 @@ public class GraphXings {
         g.addEdge(newEdge);
 
         // Run the game with two players.
-        Game game = new Game(g, 1000, 100, new RandomPlayer("Player 1"), new BruteForcePlayer("Player 2"));
+        NewGame newGame = new NewGame(g, 1000, 1000, new NewRandomPlayer("Player 1"), new GridPlayer("Player 2"));
         long t0 = System.currentTimeMillis();
-        GameResult res = game.play();
+        NewGameResult res = newGame.play();
         long runningTime = System.currentTimeMillis() - t0;
         // Display the result!
         System.out.println("running time: " + runningTime + "ms");

@@ -7,10 +7,11 @@ import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameMove;
+import GraphXings.Game.GameState;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static GraphXings.Algorithms.NewPlayer.Role.MAX;
@@ -21,6 +22,11 @@ public class GridPlayer implements NewPlayer {
      * The name of the player.
      */
     private final String name;
+    private Graph g;
+    private int height;
+    private int width;
+    private Role role;
+    private GameState gameState;
 
     /**
      * Creates a player with the assigned name.
@@ -31,15 +37,6 @@ public class GridPlayer implements NewPlayer {
         this.name = name;
     }
 
-
-    public GameMove oldMaximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, MAX);
-    }
-
-
-    public GameMove oldMinimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, MIN);
-    }
 
     /**
      * @param numVertices    number of randomly selected vertices
@@ -56,16 +53,17 @@ public class GridPlayer implements NewPlayer {
 
         HashSet<Vertex> sampledVertices = new HashSet<>();
         Random r = new Random();
-        int next = r.nextInt(numVertices);
+        int randomInt = r.nextInt(numVertices);
         int skipped = 0;
         for (Vertex u : g.getVertices()) {
             if (!placedVertices.contains(u)) {
-                if (skipped < next) {
+                if (skipped < randomInt) {
                     skipped++;
                     continue;
                 }
                 sampledVertices.add(u);
-                break;
+                numVertices--;
+                if (numVertices == 0) break;
             }
         }
         return sampledVertices;
@@ -99,44 +97,49 @@ public class GridPlayer implements NewPlayer {
                 if (yUpper >= height) {
                     yUpper = height - 1;
                 }
-                Coordinate gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
+                Optional<Coordinate> gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
                 // skip if no free coordinate is found
-                if (gridCoordinate == null) {
-                    continue;
-                }
-                randomGridCoordinates.add(gridCoordinate);
-
+                if (gridCoordinate.isEmpty()) continue;
+                randomGridCoordinates.add(gridCoordinate.get());
             }
         }
-        //System.out.println( " xLower: " + xLower + " xUpper: " + xUpper + " yLower: " + yLower + " yUpper: " + yUpper );
-
         return randomGridCoordinates;
     }
 
-    private Coordinate getRandomGridCoordinate(int xLower, int xUpper, int yLower, int yUpper, int[][] usedCoordinates) {
+    private Optional<Coordinate> getRandomGridCoordinate(int xLower, int xUpper, int yLower, int yUpper, int[][] usedCoordinates) {
         Random r = new Random();
         int x;
         int y;
-        int trys = 0;
-        Coordinate tileCoordinate;
-        do {
-            x = Math.toIntExact(r.nextLong(xUpper + 1 - xLower) + xLower);
-            y = Math.toIntExact(r.nextLong(yUpper + 1 - yLower) + yLower);
-            tileCoordinate = new Coordinate(x, y);
-            trys = trys + 1;
-        } while (usedCoordinates[x][y] != 0 || trys < 1000);
-        //TODO check null
+        Coordinate tileCoordinate = null;
+        int tries = 0;
+        int numCoordinatesInTile = 1000;
 
-        return tileCoordinate;
+        do {
+            x = Math.toIntExact(r.nextInt(xUpper + 1 - xLower) + xLower);
+            y = Math.toIntExact(r.nextInt(yUpper + 1 - yLower) + yLower);
+            tries++;
+            if (usedCoordinates[x][y] == 0) {
+                tileCoordinate = new Coordinate(x, y);
+                break;
+            }
+        } while (tries < numCoordinatesInTile);
+
+        return Optional.ofNullable(tileCoordinate);
     }
 
-    private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, Role role) {
+    private GameMove selectMove(GameMove lastMove) {
+
+        // First: Apply the last move by the opponent if there is one.
+        if (lastMove != null) {
+            gameState.applyMove(lastMove);
+        }
+
         int numVertices = 5;
         //TODO Define partitions depending on width and height parameter ?
         int numHorizontalPartitions = 50;
         int numVerticalPartitions = 50;
-        HashSet<Vertex> sampledVertices = sampleRandomVertices(numVertices, g, placedVertices);
-        HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, usedCoordinates);
+        HashSet<Vertex> sampledVertices = sampleRandomVertices(numVertices, g, gameState.getPlacedVertices());
+        HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, gameState.getUsedCoordinates());
 
         int maxOrMinNumCrossings = 0;
         if (role == MIN) {
@@ -146,16 +149,18 @@ public class GridPlayer implements NewPlayer {
         Coordinate bestCoordinate = null;
         for (Vertex v : sampledVertices) {
             for (Coordinate c : randomGridCoordinates) {
-                vertexCoordinates.put(v, c);
+                gameState.getVertexCoordinates().put(v, c);
 
-                Graph gPrime = graphWithPlacedVertices(g, vertexCoordinates);
+                Graph gPrime = graphWithPlacedVertices(g, gameState.getVertexCoordinates());
 
-                CrossingCalculator cc = new CrossingCalculator(gPrime, vertexCoordinates);
+                CrossingCalculator cc = new CrossingCalculator(gPrime, gameState.getVertexCoordinates());
                 int numCrossings = cc.computeCrossingNumber();
 
-                vertexCoordinates.remove(v, c);
+                gameState.getVertexCoordinates().remove(v, c);
                 if (role == MIN && numCrossings == 0) {
-                    return new GameMove(v, c);
+                    GameMove move = new GameMove(v, c);
+                    gameState.applyMove(move);
+                    return move;
                 }
                 if ((role == MAX && numCrossings >= maxOrMinNumCrossings) || (role == MIN && numCrossings <= maxOrMinNumCrossings)) {
                     maxOrMinNumCrossings = numCrossings;
@@ -164,7 +169,9 @@ public class GridPlayer implements NewPlayer {
                 }
             }
         }
-        return new GameMove(bestVertex, bestCoordinate);
+        GameMove move = new GameMove(bestVertex, bestCoordinate);
+        gameState.applyMove(move);
+        return move;
     }
 
 
@@ -194,17 +201,21 @@ public class GridPlayer implements NewPlayer {
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
-        return null;
+        return selectMove(lastMove);
     }
 
     @Override
     public GameMove minimizeCrossings(GameMove lastMove) {
-        return null;
+        return selectMove(lastMove);
     }
 
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role) {
-
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.role = role;
+        this.gameState = new GameState(width, height);
     }
 
     @Override

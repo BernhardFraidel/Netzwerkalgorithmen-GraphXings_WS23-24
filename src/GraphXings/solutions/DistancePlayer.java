@@ -50,8 +50,8 @@ public class DistancePlayer implements Player {
         int trys = 0;
         Coordinate tileCoordinate;
         do {
-            x = Math.toIntExact(r.nextLong(xUpper + 1 - xLower) + xLower);
-            y = Math.toIntExact(r.nextLong(yUpper + 1 - yLower) + yLower);
+            x = Math.toIntExact(r.nextInt(xUpper + 1 - xLower) + xLower);
+            y = Math.toIntExact(r.nextInt(yUpper + 1 - yLower) + yLower);
             tileCoordinate = new Coordinate(x,y);
             trys = trys + 1;
         } while (usedCoordinates[x][y]!=0 || trys > 1000);
