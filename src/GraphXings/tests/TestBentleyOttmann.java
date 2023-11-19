@@ -1,6 +1,6 @@
 package GraphXings.tests;
 
-import GraphXings.Algorithms.BentleyOttmannCrossingCalculator;
+import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculator;
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
@@ -34,15 +34,15 @@ public class TestBentleyOttmann {
             previousVertex = newVertex;
         }
 
-//        test1(g);
-//        test2(g);
-//        test3(g);
-//        test4(g);
-//        test5(g);
-//        test6(g);
-//        test7(g);
-//        test8(g);
-//        test9(g);
+        test1(g);
+        test2(g);
+        test3(g);
+        test4(g);
+        test5(g);
+        test6(g);
+        test7(g);
+        test8(g);
+        test9(g);
         test10(g);
 //        randomTest(g, width, height);
     }

@@ -1,6 +1,7 @@
 package GraphXings.solutions.crossingCalculator;
 
 import GraphXings.Data.*;
+import GraphXings.solutions.data.Point;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,35 +72,61 @@ public class BentleyOttmannCrossingCalculator {
                 case INTERSECTION -> {
                     Segment upperSegment = event.segments.get(1);
                     //edge case: multiple intersections at the same point
-                    List<Event> intersectionEventsAtSamePoint = this.eventQueue
+                    List<Event> intersectionEventsAtSamePoint = new ArrayList<>(this.eventQueue
                             .stream()
                             .filter(event1 -> event1.eventType == EventType.INTERSECTION && event1.point.equals(event.point))
-                            .toList();
+                            .toList());
                     if (!intersectionEventsAtSamePoint.isEmpty()) {
-                        //remove all intersections at this point from the eventQueue
-                        //(this event is already polled from the queue)
-                        this.eventQueue.removeAll(intersectionEventsAtSamePoint);
-                        this.processedEvents.addAll(intersectionEventsAtSamePoint);
-
                         //swap the segments
-                        Set<Integer> indicesOfSegments = intersectionEventsAtSamePoint
+                        Set<Segment> segmentsIntersectingAtSamePoint = intersectionEventsAtSamePoint
                                 .stream()
                                 .flatMap(event1 -> event1.segments.stream())
+                                .collect(Collectors.toSet());
+                        segmentsIntersectingAtSamePoint.add(segment);
+                        segmentsIntersectingAtSamePoint.add(upperSegment);
+
+                        Set<Integer> indicesOfSegmentsIntersectingAtSamePoint = segmentsIntersectingAtSamePoint
+                                .stream()
                                 .map(segment1 -> this.activeSegments.indexOf(segment1))
                                 .collect(Collectors.toSet());
-                        indicesOfSegments.add(this.activeSegments.indexOf(segment));
-                        indicesOfSegments.add(this.activeSegments.indexOf(upperSegment));
+
+                        //remove the intersection events whose segments already intersected at another point
+                        // i.e. overlapping segments
+                        Set<Event> eventsForSegmentsAlreadyProcessedAtAnotherPoint = new HashSet<>();
+                        for (Segment segmentIntersecting : segmentsIntersectingAtSamePoint) {
+                            Set<Event> otherEventsContainingSegment = processedEvents
+                                    .stream()
+                                    .filter(event1 -> (!event1.equals(event) && event1.eventType == EventType.INTERSECTION && event1.segments.contains(segmentIntersecting)))
+                                    .collect(Collectors.toSet());
+                            for (Event otherEvent : otherEventsContainingSegment) {
+                                List<Segment> segmentsOfOtherEvent = new ArrayList<>(otherEvent.segments);
+                                segmentsOfOtherEvent.remove(segmentIntersecting);
+                                Segment otherSegment = segmentsOfOtherEvent.get(0);
+                                if (segmentsIntersectingAtSamePoint.contains(otherSegment)) {
+                                    eventsForSegmentsAlreadyProcessedAtAnotherPoint.add(otherEvent);
+                                }
+                            }
+                        }
+
+                        //TODO: remove duplicates from eventsForSegmentsAlreadyProcessedAtAnotherPoint?
+
+
                         //calculate n choose 2 where n is the number of segments intersecting in this point
-                        int n = indicesOfSegments.size();
-                        intersections += (((n - 1) * n) / 2);
-                        int min = indicesOfSegments.stream().min(Integer::compareTo).orElse(-1);
-                        int max = indicesOfSegments.stream().max(Integer::compareTo).orElse(-1);
+                        int n = indicesOfSegmentsIntersectingAtSamePoint.size();
+                        intersections += ((((n - 1) * n) / 2) - eventsForSegmentsAlreadyProcessedAtAnotherPoint.size());
+                        int min = indicesOfSegmentsIntersectingAtSamePoint.stream().min(Integer::compareTo).orElse(-1);
+                        int max = indicesOfSegmentsIntersectingAtSamePoint.stream().max(Integer::compareTo).orElse(-1);
                         assert min != -1 && max != -1;
                         Collections.reverse(this.activeSegments.subList(min, max + 1));
 
                         //check for intersections of outer segments
                         checkForIntersectionWithLowerNeighbour(this.activeSegments.get(min), min, event.point.x());
                         checkForIntersectionWithUpperNeighbour(this.activeSegments.get(max), max, event.point.x());
+
+                        //remove all intersections at this point from the eventQueue
+                        //(this event is already polled from the queue)
+                        this.eventQueue.removeAll(intersectionEventsAtSamePoint);
+                        this.processedEvents.addAll(intersectionEventsAtSamePoint);
                         break;
                     }
 
@@ -149,8 +176,8 @@ public class BentleyOttmannCrossingCalculator {
 
 
     private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2, Rational minX) {
-        Segment.getIntersection(segment1, segment2).ifPresent(point -> {
-            Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
+        BentleyOttmannUtil.getIntersection(segment1, segment2).ifPresent(point -> {
+            Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2), List.of());
             if (!this.eventQueue.contains(newEvent) && (!Rational.lesserEqual(point.x(), minX) || Rational.equals(point.x(), minX))
                     && !this.processedEvents.contains(newEvent)) {
                 this.eventQueue.add(newEvent);
@@ -232,15 +259,15 @@ public class BentleyOttmannCrossingCalculator {
             Coordinate end = start.equals(tCoordinate) ? sCoordinate : tCoordinate;
 
             Segment segment = new Segment(start, end);
-            Event newStartEvent = new Event(new Point(new Rational(start.getX()), new Rational(start.getY())), EventType.SEGMENT_START, List.of(segment));
-            Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment));
+            Event newStartEvent = new Event(new Point(new Rational(start.getX()), new Rational(start.getY())), EventType.SEGMENT_START, List.of(segment), List.of(edge));
+            Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment), List.of(edge));
             this.eventQueue.add(newStartEvent);
             this.eventQueue.add(newEndEvent);
         }
     }
 
 
-    private record Event(Point point, EventType eventType, List<Segment> segments) {
+    private record Event(Point point, EventType eventType, List<Segment> segments, List<Edge> edges) {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof Event event) {
