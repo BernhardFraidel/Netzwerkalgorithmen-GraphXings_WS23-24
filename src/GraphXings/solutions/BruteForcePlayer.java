@@ -1,5 +1,7 @@
-package GraphXings.Algorithms;
+package GraphXings.solutions;
 
+import GraphXings.Algorithms.CrossingCalculator;
+import GraphXings.Algorithms.Player;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
