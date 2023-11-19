@@ -15,6 +15,15 @@ public class BentleyOttmannUtil {
     }
 
     public static Optional<Point> getIntersection(Segment s1, Segment s2) {
+        //check if adjacent
+        Point startS1 = new Point(s1.getStartX(), s1.getStartY());
+        Point endS1 = new Point(s1.getEndX(), s1.getEndY());
+        Point startS2 = new Point(s2.getStartX(), s2.getStartY());
+        Point endS2 = new Point(s2.getEndX(), s2.getEndY());
+        if (startS1.equals(startS2) || startS1.equals(endS2) || endS1.equals(startS2) || endS1.equals(endS2)) {
+            return Optional.empty();
+        }
+
         if (!s1.isVertical() && !s2.isVertical())
         {
             if (!Rational.equals(s1.getA(),s2.getA()))

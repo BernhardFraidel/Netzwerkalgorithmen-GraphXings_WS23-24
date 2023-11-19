@@ -42,19 +42,9 @@ public class BentleyOttmannCrossingCalculator {
                         insertionIndex = this.activeSegments.indexOf(segment);
                     }
 
-                    //check for intersection of new segment with lower neighbour
-                    try {
-                        Segment lowerNeighbour = this.activeSegments.get(insertionIndex - 1);
-                        checkForIntersectionAndAddEvent(lowerNeighbour, segment, event.point.x());
-                    } catch (IndexOutOfBoundsException ignored) {
-                    }
-
-                    //same with upper neighbour
-                    try {
-                        Segment upperNeighbour = this.activeSegments.get(insertionIndex + 1);
-                        checkForIntersectionAndAddEvent(segment, upperNeighbour, event.point.x());
-                    } catch (IndexOutOfBoundsException ignored) {
-                    }
+                    //check for intersection of new segment with lower and upper neighbour
+                    checkForIntersectionWithLowerNeighbour(segment, insertionIndex, event.point.x());
+                    checkForIntersectionWithUpperNeighbour(segment, insertionIndex, event.point.x());
                 }
                 case SEGMENT_END -> {
                     //check neighbors for intersection
@@ -177,7 +167,7 @@ public class BentleyOttmannCrossingCalculator {
 
     private void checkForIntersectionAndAddEvent(Segment segment1, Segment segment2, Rational minX) {
         BentleyOttmannUtil.getIntersection(segment1, segment2).ifPresent(point -> {
-            Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2), List.of());
+            Event newEvent = new Event(point, EventType.INTERSECTION, List.of(segment1, segment2));
             if (!this.eventQueue.contains(newEvent) && (!Rational.lesserEqual(point.x(), minX) || Rational.equals(point.x(), minX))
                     && !this.processedEvents.contains(newEvent)) {
                 this.eventQueue.add(newEvent);
@@ -195,10 +185,20 @@ public class BentleyOttmannCrossingCalculator {
             if (Rational.lesserEqual(point.y(), y)) {
                 //if equal to y of other segment:
                 // decide dependent of slope s.t. touching intersection event swaps the two segments correctly
-                if (Rational.equals(point.y(), y) && slope != null && (segment.getA() == null || Rational.lesserEqual(slope, segment.getA()))) {
-                    //slope of segment to be inserted is less (or equal) than slope of other segment
-                    // so new segment gets inserted after other segment
-                    index++;
+                if (Rational.equals(point.y(), y)) {
+                    //invert insertion behavior if segments are adjacent because there won't be
+                    // an insertion event that swaps them
+                    boolean adjacent = (point.equals(new Point(segment.getStartX(), segment.getStartY()))
+                            || point.equals(new Point(segment.getEndX(), segment.getEndY())));
+                    if (slope != null && (segment.getA() == null || Rational.lesserEqual(slope, segment.getA()))) {
+                        //slope of segment to be inserted is less (or equal) than slope of other segment
+                        // so new segment gets inserted after other segment
+                        if (!adjacent) {
+                            index++;
+                        }
+                    } else if (adjacent) {
+                        index++;
+                    }
                 }
                 found = true;
                 break;
@@ -259,15 +259,15 @@ public class BentleyOttmannCrossingCalculator {
             Coordinate end = start.equals(tCoordinate) ? sCoordinate : tCoordinate;
 
             Segment segment = new Segment(start, end);
-            Event newStartEvent = new Event(new Point(new Rational(start.getX()), new Rational(start.getY())), EventType.SEGMENT_START, List.of(segment), List.of(edge));
-            Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment), List.of(edge));
+            Event newStartEvent = new Event(new Point(new Rational(start.getX()), new Rational(start.getY())), EventType.SEGMENT_START, List.of(segment));
+            Event newEndEvent = new Event(new Point(new Rational(end.getX()), new Rational(end.getY())), EventType.SEGMENT_END, List.of(segment));
             this.eventQueue.add(newStartEvent);
             this.eventQueue.add(newEndEvent);
         }
     }
 
 
-    private record Event(Point point, EventType eventType, List<Segment> segments, List<Edge> edges) {
+    private record Event(Point point, EventType eventType, List<Segment> segments) {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof Event event) {

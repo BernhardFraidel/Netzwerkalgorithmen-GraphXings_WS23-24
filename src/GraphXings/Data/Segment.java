@@ -1,7 +1,5 @@
 package GraphXings.Data;
 
-import java.util.Optional;
-
 /**
  * A class for managing a segment in the Euclidean plane.
  */
