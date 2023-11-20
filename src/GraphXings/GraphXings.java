@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.time.Duration;
 
 import GraphXings.Algorithms.BetterThanRandomPlayer;
+//import GraphXings.Algorithms.DistancePlayer;
+//import GraphXings.Algorithms.GridPlayer;
+import GraphXings.Algorithms.NewBetterFasterPlayer;
 import GraphXings.Algorithms.NewBetterThanRandomPlayer;
 import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Algorithms.NewPlayer;
@@ -97,30 +100,11 @@ public class GraphXings
         System.out.println(res.announceResult());
          */
 
-         /* for(int i=0; i<10;i++)
-         {  
-            Instant start = Instant.now();
-
-            Game game = new Game(gBig,w,h,new BetterThanRandomPlayer("BetterThanRandomPlayer"), new RandomPlayer("RandomPlayer"));
-            GameResult res = game.play();
-            // Display the result!
-            System.out.println("\n");
-            System.out.println(res.announceResult());
-    
-            Instant finish = Instant.now();
-
-            long timeElapsed = Duration.between(start, finish).toMillis();
-            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds");
-
-            
-
-         } */
-
          for(int i=0; i<3;i++)
          {  
             Instant start = Instant.now();
 
-            NewGame newGame = new NewGame(gBig, w,h,new NewBetterThanRandomPlayer("NewBetterThanRandomPlayer"), new NewRandomPlayer("NewRandomPlayer"));
+            NewGame newGame = new NewGame(gBig, w,h,new NewBetterFasterPlayer("NewBetterFasterPlayer"), new NewRandomPlayer("NewRandomPlayer"));
             NewGameResult res = newGame.play();
             // Display the result!
             System.out.println("\n");
@@ -129,11 +113,28 @@ public class GraphXings
             Instant finish = Instant.now();
 
             long timeElapsed = Duration.between(start, finish).toMillis();
-            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds");
+            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds");           
+
+         } 
+
+         /* for(int i=0; i<3;i++)
+         {  
+            Instant start = Instant.now();
+
+            NewGame newGame = new NewGame(gBig, w,h,new NewRandomPlayer("NewRandomPlayer"), new NewBetterThanRandomPlayer("NewBetterThanRandomPlayer"));
+            NewGameResult res = newGame.play();
+            // Display the result!
+            System.out.println("\n");
+            System.out.println(res.announceResult());
+    
+            Instant finish = Instant.now();
+
+            long timeElapsed = Duration.between(start, finish).toMillis();
+            System.out.println("\n"+"Time taken to execute: "+String.valueOf(timeElapsed) + " milliseconds"); */
 
             
 
          }
 
     }
-}
+
