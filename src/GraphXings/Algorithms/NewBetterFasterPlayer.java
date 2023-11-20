@@ -286,7 +286,7 @@ private GameMove selectMove(boolean maximize)
 
 GameMove selectedMove;
 try {
-    // Set a timeout of 4.9 minutes (294,000 milliseconds)
+    // Set a timeout of 4.5 minutes (270,000 milliseconds)
     selectedMove = future.get(270000 , TimeUnit.MILLISECONDS);
 } catch (InterruptedException | ExecutionException | TimeoutException e) {
     // If timeout occurs, return a random move
