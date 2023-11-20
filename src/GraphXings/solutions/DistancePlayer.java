@@ -1,6 +1,7 @@
 package GraphXings.solutions;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
@@ -8,18 +9,24 @@ import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameMove;
+import GraphXings.Game.GameState;
 
 import java.util.*;
 
-import static GraphXings.Algorithms.Player.Role.MAX;
-import static GraphXings.Algorithms.Player.Role.MIN;
+import static GraphXings.Algorithms.NewPlayer.Role.MAX;
+import static GraphXings.Algorithms.NewPlayer.Role.MIN;
 
-public class DistancePlayer implements Player {
+public class DistancePlayer implements NewPlayer {
     /**
      * The name of the player.
      */
     private String name;
-
+    private Graph g;
+    private int height;
+    private int width;
+    private Role role;
+    private GameState gameState;
+    private Random r = new Random();
     /**
      * Creates a player with the assigned name.
      * @param name name of player
@@ -27,88 +34,134 @@ public class DistancePlayer implements Player {
     public DistancePlayer(String name){ this.name = name; }
 
     @Override
-    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
-    {
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, MAX);
-    }
+    public GameMove maximizeCrossings(GameMove lastMove) { return selectMove(lastMove); }
 
     @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
-    {
-        return selectMove(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, MIN);
-    }
+    public GameMove minimizeCrossings(GameMove lastMove) { return selectMove(lastMove); }
+
     public double distance(Coordinate a, Coordinate b) {
         double ac = Math.abs(b.getY() - a.getY());
         double cb = Math.abs(b.getX() - a.getX());
         return Math.hypot(ac, cb);
     }
 
-    private Coordinate getRandomGridCoordinate(int xLower, int xUpper, int yLower, int yUpper, int[][] usedCoordinates) {
-        Random r = new Random();
-        int x;
-        int y;
-        int trys = 0;
-        Coordinate tileCoordinate;
-        do {
-            x = Math.toIntExact(r.nextInt(xUpper + 1 - xLower) + xLower);
-            y = Math.toIntExact(r.nextInt(yUpper + 1 - yLower) + yLower);
-            tileCoordinate = new Coordinate(x,y);
-            trys = trys + 1;
-        } while (usedCoordinates[x][y]!=0 || trys > 1000);
-        //TODO check null
-        return tileCoordinate;
-    }
-
-    private HashSet<Coordinate> sampleRandomGrid(int width, int height, int numHorizontalPartitions, int numVerticalPartitions, int[][] usedCoordinates){
+    private HashSet<Coordinate> sampleRandomGrid(int width, int height, int numHorizontalPartitions, int numVerticalPartitions, int[][] usedCoordinates) {
         // make sure that partitions size will be bigger or equal to 1
-        if (width <= numHorizontalPartitions){ numHorizontalPartitions = width; }
-        if (height <= numVerticalPartitions){ numVerticalPartitions = height; }
+        if (width <= numHorizontalPartitions) {
+            numHorizontalPartitions = width;
+        }
+        if (height <= numVerticalPartitions) {
+            numVerticalPartitions = height;
+        }
 
         int tileWidth = Math.floorDiv(width, numHorizontalPartitions);
         int tileHeight = Math.floorDiv(height, numVerticalPartitions);
 
         HashSet<Coordinate> randomGridCoordinates = new HashSet<>();
         int xLower = 0;
-        int xUpper = 0; //tileWidth == 1 ? 1 : tileWidth - 1;
+        int xUpper = 0;
         int yLower = 0;
-        int yUpper = 0; //tileHeight == 1 ? 1 : tileHeight - 1;
-        for (xLower = 0; xLower < width -1; xLower = xUpper){
+        int yUpper = 0;
+        for (xLower = 0; xLower < width - 1; xLower = xUpper) {
             xUpper = xUpper + tileWidth;
-            if (xUpper >= width){ xUpper = width - 1; }
+            if (xUpper >= width) {
+                xUpper = width - 1;
+            }
             yUpper = 0;
-            for (yLower = 0; yLower < height -1; yLower = yUpper){
+            for (yLower = 0; yLower < height - 1; yLower = yUpper) {
                 yUpper = yUpper + tileHeight;
-                if (yUpper >= height){ yUpper = height - 1; }
-                Coordinate gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
+                if (yUpper >= height) {
+                    yUpper = height - 1;
+                }
+                Optional<Coordinate> gridCoordinate = getRandomGridCoordinate(xLower, xUpper, yLower, yUpper, usedCoordinates);
                 // skip if no free coordinate is found
-                if (gridCoordinate == null){ continue; }
-                randomGridCoordinates.add(gridCoordinate);
+                if (gridCoordinate.isEmpty()) continue;
+                randomGridCoordinates.add(gridCoordinate.get());
             }
         }
         return randomGridCoordinates;
     }
 
-    private GameMove selectMove(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, Role role) {
-        int numNeighbors = 2;
-        int numHorizontalPartitions = 150;
-        int numVerticalPartitions = 150;
-        // if there is no vertex choose at random
-        if (placedVertices.isEmpty()){
-            RandomPlayer randomPlayer = new RandomPlayer("rand");
+    private Optional<Coordinate> getRandomGridCoordinate(int xLower, int xUpper, int yLower, int yUpper, int[][] usedCoordinates) {
+        int x;
+        int y;
+        Coordinate tileCoordinate = null;
+        int tries = 0;
+        int numCoordinatesInTile = 5 * (xUpper - xLower) * (yUpper - yLower);
+
+        do {
+            x = Math.toIntExact(r.nextInt(xUpper + 1 - xLower) + xLower);
+            y = Math.toIntExact(r.nextInt(yUpper + 1 - yLower) + yLower);
+            tries++;
+            if (usedCoordinates[x][y] == 0) {
+                tileCoordinate = new Coordinate(x, y);
+                break;
+            }
+        } while (tries < numCoordinatesInTile);
+
+        return Optional.ofNullable(tileCoordinate);
+    }
+
+    /**
+     *
+     * @return get the neighbors to all placed vertices with a list to the already placed vertices that are connected to the neighbor
+     */
+    private HashMap<Vertex, List<Vertex>> getNeighborsOfPlacedVertices (){
+        HashMap<Vertex,List<Vertex>> neighborsOfPlacedVertices = new HashMap<>();
+        Iterator<Vertex> placedVertices = gameState.getPlacedVertices().iterator();
+        while(placedVertices.hasNext()){
+            Vertex v = placedVertices.next();
+            Iterable<Edge> incidentEdges = g.getIncidentEdges(v);
+            for(Edge e : incidentEdges){
+                Vertex n = e.getS() == v ? e.getT(): e.getS();
+                neighborsOfPlacedVertices.get(v).add(n);
+            }
+        }
+
+
+
+        return null;
+    }
+
+    private GameMove selectMove(GameMove lastMove) {
+        // First: Apply the last move by the opponent if there is one.
+        if (lastMove != null) {
+            gameState.applyMove(lastMove);
+        }
+
+        int numHorizontalPartitions = 50;
+        int numVerticalPartitions = 50;
+
+        // if there is no placed vertex choose at random
+        if (gameState.getPlacedVertices().isEmpty()){
+            NewRandomPlayer newRandomPlayer = new NewRandomPlayer("rand");
             GameMove move = switch(role){
-                case MAX -> randomPlayer.maximizeCrossings(g,vertexCoordinates,gameMoves,usedCoordinates,placedVertices,width,height);
-                case MIN -> randomPlayer.minimizeCrossings(g,vertexCoordinates,gameMoves,usedCoordinates,placedVertices,width,height);
+                case MAX -> newRandomPlayer.maximizeCrossings(lastMove);
+                case MIN -> newRandomPlayer.minimizeCrossings(lastMove);
             };
+            gameState.applyMove(move);
             return move;
         }
+
+        int numNeighbors = 2;
         // get numNeighbors Neighbors
         HashMap<Vertex,List<Vertex>> neighbors = new HashMap<>();
-        Iterator<Vertex> placedVerticesIterator = placedVertices.iterator();
-        //System.out.println("placedverticesIterator: "+ placedVerticesIterator.hasNext());
+        neighbors = getNeighborsOfPlacedVertices();
+        neighbors.size();
+
+        //GameMove move = new GameMove(bestVertex, bestCoordinate);
+        //gameState.applyMove(move);
+        //return move;
+
+
+
+
+
+
+
+        Iterator<Vertex> placedVerticesIterator = gameState.getPlacedVertices().iterator();
         int i = 0;
         while ( i < numNeighbors ){
-            //System.out.println("i: "+ i);
-            //System.out.println("placedverticesIterator: "+ placedVerticesIterator.hasNext());
             if (!placedVerticesIterator.hasNext()){ break;}
             Vertex placedVertex = placedVerticesIterator.next();
             Iterable<Edge> incidentEdges = g.getIncidentEdges(placedVertex);
@@ -116,11 +169,11 @@ public class DistancePlayer implements Player {
             for (Edge e: incidentEdges){
                 Vertex s = e.getS();
                 Vertex t = e.getT();
-                if (s.equals(placedVertex) && !placedVertices.contains(t) ){
+                if (s.equals(placedVertex) && !gameState.getPlacedVertices().contains(t) ){
                      otherNeighbors.add(t);
                      neighbors.put(placedVertex, otherNeighbors);
                     i++;
-                } else if (t.equals(placedVertex) && !placedVertices.contains(s) ){
+                } else if (t.equals(placedVertex) && !gameState.getPlacedVertices().contains(s) ){
                     otherNeighbors.add(s);
                     neighbors.put(placedVertex, otherNeighbors);
                     i++;
@@ -128,26 +181,24 @@ public class DistancePlayer implements Player {
             }
         }
         //System.out.println("neighbours: "+ neighbors.keySet());
-        HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, usedCoordinates);
-
-
-        RandomPlayer randomPlayer = new RandomPlayer("rand");
+        HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, gameState.getUsedCoordinates());
+        NewRandomPlayer newRandomPlayer = new NewRandomPlayer("rand");
         GameMove bestMove = switch(role){
-            case MAX -> randomPlayer.maximizeCrossings(g,vertexCoordinates,gameMoves,usedCoordinates,placedVertices,width,height);
-            case MIN -> randomPlayer.minimizeCrossings(g,vertexCoordinates,gameMoves,usedCoordinates,placedVertices,width,height);
+            case MAX -> newRandomPlayer.maximizeCrossings(lastMove);
+            case MIN -> newRandomPlayer.minimizeCrossings(lastMove);
         };
         int minMaxNumCrossings = role == MAX ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         // n root neighbours
         for (Vertex n : neighbors.keySet()){
             List<Vertex> neighborsList = neighbors.get(n);
-            Coordinate placedCoordinate = vertexCoordinates.get(n);
+            Coordinate placedCoordinate = gameState.getVertexCoordinates().get(n);
             double maxMinDistance = role == MAX ? Double.MIN_VALUE : Double.MAX_VALUE;
             HashMap<Vertex, Coordinate> vertexDistanceToNeighbor = new HashMap<>();
             // test each grid coordinate for shortest longest distance to root vertex
             //Coordinate coordinateMaxMinDistanceToRoot;
             for (Coordinate c : randomGridCoordinates){
                 double distance = distance(placedCoordinate, c);
-                if (role == MAX && distance > maxMinDistance){
+                if (role == MAX  && distance > maxMinDistance){
                     maxMinDistance = distance;
                     //coordinateMaxMinDistanceToRoot = c;
                     bestMove = new GameMove(neighborsList.get(0),c);
@@ -220,7 +271,11 @@ public class DistancePlayer implements Player {
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role)
     {
-
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.role = role;
+        this.gameState = new GameState(width, height);
     }
 
     @Override
