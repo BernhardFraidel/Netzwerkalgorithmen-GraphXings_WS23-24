@@ -57,7 +57,11 @@ public class BentleyOttmannCrossingCalculator {
                     }
 
                     //remove from active segments
-                    this.activeSegments.remove(index);
+                    try {
+                        this.activeSegments.remove(index);
+                    } catch (IndexOutOfBoundsException ignored) {
+
+                    }
                 }
                 case INTERSECTION -> {
                     Segment upperSegment = event.segments.get(1);
@@ -131,9 +135,7 @@ public class BentleyOttmannCrossingCalculator {
                     //swap intersecting segments (in activeSegments list)
                     try {
                         Collections.swap(this.activeSegments, lowerIndex, upperIndex);
-                    } catch (IndexOutOfBoundsException e) {
-                        System.out.println("???");
-                        e.printStackTrace();
+                    } catch (IndexOutOfBoundsException ignored) {
                     }
 
                     //check for intersections with new neighbours
@@ -217,7 +219,7 @@ public class BentleyOttmannCrossingCalculator {
         // 1. the x coordinate of the points
         // 2. the y coordinate of the point
         // 3. the event type (INTERSECTION -> START -> END)
-        // 4. the direction of the segments
+        // 4. the slope of the segments
         this.eventQueue = new PriorityQueue<>((o1, o2) -> {
             if (!Rational.lesserEqual(o1.point.x(), o2.point.x())) return 1;
             else if (Rational.lesserEqual(o1.point.x(), o2.point.x()) && !Rational.equals(o1.point.x(), o2.point.x()))
@@ -235,8 +237,10 @@ public class BentleyOttmannCrossingCalculator {
                         else {
                             Segment o1Segment = o1.segments.get(0);
                             Segment o2Segment = o2.segments.get(0);
-                            if (o1Segment.getEndY().equals(o2Segment.getEndY())) return 0;
-                            else if (Rational.lesserEqual(o1Segment.getEndY(), o2Segment.getEndY())) return -1;
+                            if (o1Segment.isVertical()) return -1;
+                            else if (o2Segment.isVertical()) return 1;
+                            else if (o1Segment.getA().equals(o2Segment.getA())) return 0;
+                            else if (Rational.lesserEqual(o1Segment.getA(), o2Segment.getA())) return -1;
                             else return 1;
                         }
                     }

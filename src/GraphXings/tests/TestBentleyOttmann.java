@@ -1,17 +1,22 @@
 package GraphXings.tests;
 
-import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculator;
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
+import GraphXings.Game.GameInstance.GameInstance;
+import GraphXings.Game.GameInstance.RandomCycleFactory;
+import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculatorLite;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
 public class TestBentleyOttmann {
+    static int falseCounting = 0;
+    static int difference = 0;
+
     public static void testBentleyOttman(int numVertices, int width, int height) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
@@ -25,26 +30,36 @@ public class TestBentleyOttmann {
             //create new vertex
             Vertex newVertex = new Vertex(Integer.toString(i));
             g.addVertex(newVertex);
+
             //create edge between new vertex and previous vertex for every second vertex to create segments
-//            if (i % 2 == 1) {
-                Edge newEdge = new Edge(previousVertex, newVertex);
-                g.addEdge(newEdge);
-//            }
+            Edge newEdge = new Edge(previousVertex, newVertex);
+            g.addEdge(newEdge);
+
             //save new vertex for next iteration
             previousVertex = newVertex;
         }
+        //connect last and first vertex to get cycle
+        Edge newEdge = new Edge(previousVertex, firstVertex);
+        g.addEdge(newEdge);
 
-        test1(g);
-        test2(g);
-        test3(g);
-        test4(g);
-        test5(g);
+//        test1(g);
+//        test2(g);
+//        test3(g);
+//        test4(g);
+//        test5(g);
 //        test6(g);
 //        test7(g);
 //        test8(g);
-        test9(g);
-        test10(g);
-//        randomTest(g, width, height);
+//        test9(g);
+//        test10(g);
+//        for (int i = 0; i < 100; i++) {
+//            randomTest(g, width, height);
+//        }
+        for (int i = 0; i < 10; i++) {
+            generatedGraphTest(width, height);
+        }
+        System.out.println("number of tests with false counting: " + falseCounting);
+        if (falseCounting > 0) System.out.println("mean difference: " + difference / falseCounting);
     }
 
     private static void test1(Graph g) {
@@ -327,15 +342,29 @@ public class TestBentleyOttmann {
         test("random", g, vertexCoordinates);
     }
 
+    private static void generatedGraphTest(int width, int height) {
+        RandomCycleFactory cycleFactory = new RandomCycleFactory();
+        GameInstance gameInstance = cycleFactory.getGameInstance();
+        randomTest(gameInstance.getG(), gameInstance.getWidth(), gameInstance.getHeight());
+    }
+
 
     private static void test(String testName, Graph g, HashMap<Vertex, Coordinate> vertexCoordinates) {
-        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g, vertexCoordinates);
-        int bentleyOttmannCrossings = bocc.calculate();
+//        BentleyOttmannCrossingCalculator bocc = new BentleyOttmannCrossingCalculator(g, vertexCoordinates);
+//        int bentleyOttmannCrossings = bocc.calculate();
+        long t0 = System.currentTimeMillis();
+        BentleyOttmannCrossingCalculatorLite boLite = new BentleyOttmannCrossingCalculatorLite(g, vertexCoordinates);
+        int bentleyOttmannCrossings = boLite.calculate();
+        System.out.println("bentley ottmann time: " + (System.currentTimeMillis() - t0));
 
         CrossingCalculator cc = new CrossingCalculator(g, vertexCoordinates);
         int oldNumCrossings = cc.computeCrossingNumber();
         // Display the result!
         System.out.println("Test " + testName + ": old: " + oldNumCrossings + " new: " + bentleyOttmannCrossings);
+        if (oldNumCrossings != bentleyOttmannCrossings) {
+            falseCounting++;
+            difference += Math.abs(oldNumCrossings - bentleyOttmannCrossings);
+        }
 //        assert oldNumCrossings == bentleyOttmannCrossings : "Bentley-Ottmann fehlerhaft!";
     }
 }
