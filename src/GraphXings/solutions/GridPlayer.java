@@ -137,8 +137,8 @@ public class GridPlayer implements NewPlayer {
 
         int numVertices = 1;
         //TODO Define partitions depending on width and height parameter ?
-        int numHorizontalPartitions = 5;
-        int numVerticalPartitions = 5;
+        int numHorizontalPartitions = 3;
+        int numVerticalPartitions = 3;
         HashSet<Vertex> sampledVertices = sampleRandomVertices(numVertices, g, gameState.getPlacedVertices());
         HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, gameState.getUsedCoordinates());
 
@@ -154,8 +154,6 @@ public class GridPlayer implements NewPlayer {
 
                 Graph gPrime = graphWithPlacedVertices(g, gameState.getVertexCoordinates());
 
-//                CrossingCalculator cc = new CrossingCalculator(gPrime, gameState.getVertexCoordinates());
-//                int numCrossings = cc.computeCrossingNumber();
                 BentleyOttmannCrossingCalculatorLite cc = new BentleyOttmannCrossingCalculatorLite(gPrime, gameState.getVertexCoordinates());
                 int numCrossings = cc.calculate();
 
