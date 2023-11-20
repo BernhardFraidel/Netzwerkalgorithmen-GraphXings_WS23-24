@@ -117,12 +117,17 @@ public class DistancePlayer implements NewPlayer {
                 neighborsOfPlacedVertices.get(v).add(n);
             }
         }
-
-
-
-        return null;
+        return neighborsOfPlacedVertices;
     }
 
+    private GameMove randomMove(GameMove lastMove){
+        NewRandomPlayer newRandomPlayer = new NewRandomPlayer("rand");
+        GameMove move = switch(role){
+            case MAX -> newRandomPlayer.maximizeCrossings(lastMove);
+            case MIN -> newRandomPlayer.minimizeCrossings(lastMove);
+        };
+        return move;
+    }
     private GameMove selectMove(GameMove lastMove) {
         // First: Apply the last move by the opponent if there is one.
         if (lastMove != null) {
@@ -134,13 +139,9 @@ public class DistancePlayer implements NewPlayer {
 
         // if there is no placed vertex choose at random
         if (gameState.getPlacedVertices().isEmpty()){
-            NewRandomPlayer newRandomPlayer = new NewRandomPlayer("rand");
-            GameMove move = switch(role){
-                case MAX -> newRandomPlayer.maximizeCrossings(lastMove);
-                case MIN -> newRandomPlayer.minimizeCrossings(lastMove);
-            };
-            gameState.applyMove(move);
-            return move;
+            GameMove randomMove = randomMove(lastMove);
+            gameState.applyMove(randomMove);
+            return randomMove;
         }
 
         int numNeighbors = 2;
