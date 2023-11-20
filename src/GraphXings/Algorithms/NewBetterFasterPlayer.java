@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 import java.lang.Iterable;
 
 
-public class NewBetterFasterPlayer implements NewPlayer
+public class NewBetterFasterPlayer implements NewPlayer 
 {
  	/**
 	 * The name of the player.
