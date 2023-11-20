@@ -289,10 +289,10 @@ try {
     // Set a timeout of 4.9 minutes (294,000 milliseconds)
     selectedMove = future.get(270000 , TimeUnit.MILLISECONDS);
 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-    // If timeout occurs, call the method that returns a random move
+    // If timeout occurs, return a random move
    selectedMove = randomMove();
 } finally {
-    // Make sure to shut down the executor
+    // shut down the executor
     future.cancel(true);
     executor.shutdownNow(); }
 
