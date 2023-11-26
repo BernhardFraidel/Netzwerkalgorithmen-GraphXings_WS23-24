@@ -8,6 +8,7 @@ import GraphXings.Game.GameInstance.GameInstance;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.NewGame;
 import GraphXings.Game.NewGameResult;
+import GraphXings.solutions.DistancePlayer;
 import GraphXings.solutions.GridPlayer;
 import GraphXings.solutions.NewBetterFasterPlayer;
 import GraphXings.tests.TestBentleyOttmann;
@@ -20,9 +21,9 @@ public class GraphXings {
     private static void testRandomInstances() {
         RandomCycleFactory randomCycleFactory = new RandomCycleFactory();
         GameInstance gi = randomCycleFactory.getGameInstance();
-
+        System.out.println("height: " + gi.getHeight() + " width: "+ gi.getWidth() + " #vertices: "+ gi.getG().getN());
         // Run the game with two players.
-        NewGame newGame = new NewGame(gi.getG(), gi.getWidth(), gi.getHeight(), new NewRandomPlayer("Player 1"), new GridPlayer("Player 2"));
+        NewGame newGame = new NewGame(gi.getG(), gi.getWidth(), gi.getHeight(), new NewRandomPlayer("Player 1"), new DistancePlayer("Player 2"));
         long t0 = System.currentTimeMillis();
         NewGameResult res = newGame.play();
         long runningTime = System.currentTimeMillis() - t0;
