@@ -1,4 +1,6 @@
-package GraphXings.Data;
+package GraphXings.solutions.data;
+
+import GraphXings.Data.Rational;
 
 public record Point(Rational x, Rational y) {
     @Override

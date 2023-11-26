@@ -8,6 +8,7 @@ import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
+import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculatorLite;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,10 +135,10 @@ public class GridPlayer implements NewPlayer {
             gameState.applyMove(lastMove);
         }
 
-        int numVertices = 5;
+        int numVertices = 1;
         //TODO Define partitions depending on width and height parameter ?
-        int numHorizontalPartitions = 50;
-        int numVerticalPartitions = 50;
+        int numHorizontalPartitions = 3;
+        int numVerticalPartitions = 3;
         HashSet<Vertex> sampledVertices = sampleRandomVertices(numVertices, g, gameState.getPlacedVertices());
         HashSet<Coordinate> randomGridCoordinates = sampleRandomGrid(width, height, numHorizontalPartitions, numVerticalPartitions, gameState.getUsedCoordinates());
 
@@ -153,8 +154,8 @@ public class GridPlayer implements NewPlayer {
 
                 Graph gPrime = graphWithPlacedVertices(g, gameState.getVertexCoordinates());
 
-                CrossingCalculator cc = new CrossingCalculator(gPrime, gameState.getVertexCoordinates());
-                int numCrossings = cc.computeCrossingNumber();
+                BentleyOttmannCrossingCalculatorLite cc = new BentleyOttmannCrossingCalculatorLite(gPrime, gameState.getVertexCoordinates());
+                int numCrossings = cc.calculate();
 
                 gameState.getVertexCoordinates().remove(v, c);
                 if (role == MIN && numCrossings == 0) {
