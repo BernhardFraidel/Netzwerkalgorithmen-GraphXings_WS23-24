@@ -9,6 +9,7 @@ import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
+import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculatorLite;
 
 import java.util.*;
 
@@ -131,6 +132,8 @@ public class DistancePlayer implements NewPlayer {
         if (gameState.getPlacedVertices().isEmpty()) System.out.println("There are no placed vertices to get neighbours");
 
         Iterator<Vertex> placedVertices = gameState.getPlacedVertices().iterator();
+        //init neighborhood
+        placedVertices.forEachRemaining(vertex -> neighborsOfPlacedVertices.put(vertex, new ArrayList<>()));
         while(placedVertices.hasNext()){
             Vertex v = placedVertices.next();
             Iterable<Edge> incidentEdges = g.getIncidentEdges(v);
@@ -177,6 +180,8 @@ public class DistancePlayer implements NewPlayer {
         return new GameMove(v,c);
 
     }
+
+
     private GameMove selectMove(GameMove lastMove) {
         // First: Apply the last move by the opponent if there is one.
         if (lastMove != null) {
