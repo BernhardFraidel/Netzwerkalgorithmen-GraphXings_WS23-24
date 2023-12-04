@@ -50,8 +50,6 @@ public class ProjectionPlayer implements NewPlayer {
         try {
             move = getMaximizerMove(lastMove);
         } catch (Exception e) {
-//            System.err.println("Exception! Performing random move...");
-//            e.printStackTrace();
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -97,15 +95,17 @@ public class ProjectionPlayer implements NewPlayer {
         Coordinate placedVertexCoordinate = gs.getVertexCoordinates().get(placedVertex);
         Coordinate middle = new Coordinate(width / 2, height / 2);
         //y = a*x + b
-        boolean vertical = (middle.getX() - placedVertexCoordinate.getX()) == 0;
+        boolean vertical = middle.getX() == placedVertexCoordinate.getX();
         Rational a;
         Rational b;
         if (vertical) {
             a = null;
             b = null;
         } else {
-            a = new Rational((middle.getY() - placedVertexCoordinate.getY()) / (middle.getX() - placedVertexCoordinate.getX()));
-            b = Rational.minus(new Rational(middle.getY()), (Rational.times(a, new Rational(middle.getX()))));
+            int deltaY = middle.getY() - placedVertexCoordinate.getY();
+            int deltaX = middle.getX() - placedVertexCoordinate.getX();
+            a = new Rational(deltaY, deltaX);
+            b = Rational.minus(new Rational(middle.getY()), Rational.times(a, new Rational(middle.getX())));
         }
 
         Rational zero = new Rational(0);
@@ -114,18 +114,17 @@ public class ProjectionPlayer implements NewPlayer {
             //intersects left and right boundary
             yRational = b;
             //decide if left or right depending on position of placed vertex left or right of the middle
-            xRational = new Rational(placedVertexCoordinate.getX() < middle.getX() ? width : 0);
+            xRational = new Rational(placedVertexCoordinate.getX() > middle.getX() ? width : 0);
         } else {
             //intersects top and bottom boundary
             //decide if top or bottom depending on position of placed vertex above or below the middle
-            yRational = new Rational(placedVertexCoordinate.getY() < middle.getY() ? 0 : height);
+            yRational = new Rational(placedVertexCoordinate.getY() > middle.getY() ? 0 : height);
             //yRational = a*x+b --> (yRational - b) / a = x(Rational)
             xRational = vertical ? new Rational(middle.getX()) : Rational.dividedBy(Rational.minus(yRational, b), a);
         }
 
         Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
-        Coordinate newCoordinate = findClosestUnusedCoordinate(gs, nearestValidCoordinate, width, height);
-        return newCoordinate;
+        return findClosestUnusedCoordinate(gs, nearestValidCoordinate, width, height);
     }
 
 
