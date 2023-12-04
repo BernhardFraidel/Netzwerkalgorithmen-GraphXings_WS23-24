@@ -4,7 +4,6 @@ import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-import GraphXings.Game.Game;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
 
@@ -100,7 +99,7 @@ public class ProjectionPlayer implements NewPlayer {
         this.g = g;
         this.width = width;
         this.height = height;
-        this.gs = new GameState(width, height);
+        this.gs = new GameState(g, width, height);
     }
 
     @Override
