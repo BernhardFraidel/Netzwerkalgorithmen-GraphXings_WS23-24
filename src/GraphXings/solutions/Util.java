@@ -145,12 +145,12 @@ public class Util {
     public static Coordinate nearestValidCoordinate(Rational x, Rational y, int width, int height) {
         int xRounded = (int) Math.round(rationalToDouble(x));
         if (xRounded < 0) xRounded = 0;
-        else if (xRounded > width) xRounded = width - 1;
+        else if (xRounded >= width) xRounded = width - 1;
         int xCoordinate = xRounded;
 
         int yRounded = (int) Math.round(rationalToDouble(y));
         if (yRounded < 0) yRounded = 0;
-        else if (yRounded > height) yRounded = height - 1;
+        else if (yRounded >= height) yRounded = height - 1;
         int yCoordinate = yRounded;
 
         return new Coordinate(xCoordinate, yCoordinate);

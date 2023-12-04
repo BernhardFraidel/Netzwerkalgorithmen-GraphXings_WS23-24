@@ -50,8 +50,8 @@ public class ProjectionPlayer implements NewPlayer {
         try {
             move = getMaximizerMove(lastMove);
         } catch (Exception e) {
-            System.err.println("Exception! Performing random move...");
-            e.printStackTrace();
+//            System.err.println("Exception! Performing random move...");
+//            e.printStackTrace();
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -84,7 +84,7 @@ public class ProjectionPlayer implements NewPlayer {
         //find projection through the middle
         Coordinate newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
 
-        if (isValidCoordinate(newCoordinate, width, height)) {
+        if (!isValidCoordinate(newCoordinate, width, height) || gs.getUsedCoordinates()[newCoordinate.getX()][newCoordinate.getY()] != 0) {
             throw new Exception();
         }
         move = new GameMove(freeNeighbor, newCoordinate);
