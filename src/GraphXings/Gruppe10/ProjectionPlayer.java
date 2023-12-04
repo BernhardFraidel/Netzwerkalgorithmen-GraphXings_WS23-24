@@ -1,4 +1,4 @@
-package GraphXings.solutions;
+package GraphXings.Gruppe10;
 
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Coordinate;
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import static GraphXings.solutions.Util.*;
+import static GraphXings.Gruppe10.Util.*;
 
 public class ProjectionPlayer implements NewPlayer {
     /**

@@ -1,7 +1,7 @@
-package GraphXings.solutions.crossingCalculator;
+package GraphXings.Gruppe10.crossingCalculator;
 
 import GraphXings.Data.*;
-import GraphXings.solutions.data.Point;
+import GraphXings.Gruppe10.data.Point;
 
 import java.util.*;
 import java.util.stream.Collectors;

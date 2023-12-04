@@ -5,7 +5,7 @@ import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.League.NewLeague;
 import GraphXings.Game.League.NewLeagueResult;
-import GraphXings.solutions.ProjectionPlayer;
+import GraphXings.Gruppe10.ProjectionPlayer;
 
 import java.util.ArrayList;
 

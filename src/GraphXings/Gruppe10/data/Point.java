@@ -1,4 +1,4 @@
-package GraphXings.solutions.data;
+package GraphXings.Gruppe10.data;
 
 import GraphXings.Data.Rational;
 

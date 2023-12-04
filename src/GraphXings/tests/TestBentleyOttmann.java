@@ -7,7 +7,7 @@ import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameInstance.GameInstance;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
-import GraphXings.solutions.crossingCalculator.BentleyOttmannCrossingCalculatorLite;
+import GraphXings.Gruppe10.crossingCalculator.BentleyOttmannCrossingCalculatorLite;
 
 import java.util.Arrays;
 import java.util.HashMap;

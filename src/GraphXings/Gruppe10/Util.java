@@ -1,4 +1,4 @@
-package GraphXings.solutions;
+package GraphXings.Gruppe10;
 
 import GraphXings.Data.*;
 import GraphXings.Game.GameMove;
