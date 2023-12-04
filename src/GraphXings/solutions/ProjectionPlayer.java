@@ -3,19 +3,19 @@ package GraphXings.solutions;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
+import GraphXings.Data.Rational;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 
 import static GraphXings.solutions.Util.*;
 
 public class ProjectionPlayer implements NewPlayer {
-    /**
-     * The name of the random player.
-     */
-    private final String name;
     /**
      * A random number generator.
      */
@@ -39,58 +39,133 @@ public class ProjectionPlayer implements NewPlayer {
 
     /**
      * Creates a projection player with the assigned name.
-     * @param name name of the player
      */
-    public ProjectionPlayer(String name) {
-        this.name = name;
-        this.r = new Random(name.hashCode());
+    public ProjectionPlayer() {
+        this.r = new Random();
     }
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
-        // First: Apply the last move by the opponent if there is one.
-        applyLastMove(lastMove, gs);
-        GameMove move = randomMove(g, gs, r, width, height);
-        // If there is no placed vertex return random move
-        if (gs.getPlacedVertices().isEmpty()){
-            gs.applyMove(move);
-            return move;
+        GameMove move;
+        try {
+            move = getMaximizerMove(lastMove);
+        } catch (Exception e) {
+            System.err.println("Exception! Performing random move...");
+            e.printStackTrace();
+            move = randomMove(g, gs, r, width, height);
         }
-
         gs.applyMove(move);
         return move;
     }
 
-    @Override
-    public GameMove minimizeCrossings(GameMove lastMove) {
+    private GameMove getMaximizerMove(GameMove lastMove) throws Exception {
         // First: Apply the last move by the opponent if there is one.
         applyLastMove(lastMove, gs);
         GameMove move = randomMove(g, gs, r, width, height);
         // If there is no placed vertex return random move
-        if (gs.getPlacedVertices().isEmpty()){
-            gs.applyMove(move);
+        if (gs.getPlacedVertices().isEmpty()) {
+            return move;
+        }
+
+        //get a free neighbor of the previously placed vertex if there is one
+        //get any free neighbor of any placed vertex else
+        HashSet<Vertex> candidateNeighbors = getFreeNeighbors(lastMove.getVertex(), g, gs);
+        Vertex freeNeighbor;
+        Vertex placedVertex = lastMove.getVertex();
+        if (candidateNeighbors.isEmpty()) {
+            Map<Vertex, Vertex> placedVertexAndFreeNeighbor = getAnyFreeNeighbor(g, gs);
+            placedVertex = placedVertexAndFreeNeighbor.keySet().iterator().next();
+            freeNeighbor = placedVertexAndFreeNeighbor.get(placedVertex);
+        } else {
+            freeNeighbor = candidateNeighbors.iterator().next();
+        }
+
+
+        //find projection through the middle
+        Coordinate newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
+
+        if (isValidCoordinate(newCoordinate, width, height)) {
+            throw new Exception();
+        }
+        move = new GameMove(freeNeighbor, newCoordinate);
+        return move;
+    }
+
+    private Coordinate getProjectionOnBorderThroughMiddle(Vertex placedVertex) {
+        Rational xRational;
+        Rational yRational;
+        Coordinate placedVertexCoordinate = gs.getVertexCoordinates().get(placedVertex);
+        Coordinate middle = new Coordinate(width / 2, height / 2);
+        //y = a*x + b
+        boolean vertical = (middle.getX() - placedVertexCoordinate.getX()) == 0;
+        Rational a;
+        Rational b;
+        if (vertical) {
+            a = null;
+            b = null;
+        } else {
+            a = new Rational((middle.getY() - placedVertexCoordinate.getY()) / (middle.getX() - placedVertexCoordinate.getX()));
+            b = Rational.minus(new Rational(middle.getY()), (Rational.times(a, new Rational(middle.getX()))));
+        }
+
+        Rational zero = new Rational(0);
+        Rational heightRational = new Rational(height);
+        if (!vertical && (!Rational.lesserEqual(b, zero) || Rational.equals(b, zero)) && Rational.lesserEqual(b, heightRational)) {
+            //intersects left and right boundary
+            yRational = b;
+            //decide if left or right depending on position of placed vertex left or right of the middle
+            xRational = new Rational(placedVertexCoordinate.getX() < middle.getX() ? width : 0);
+        } else {
+            //intersects top and bottom boundary
+            //decide if top or bottom depending on position of placed vertex above or below the middle
+            yRational = new Rational(placedVertexCoordinate.getY() < middle.getY() ? 0 : height);
+            //yRational = a*x+b --> (yRational - b) / a = x(Rational)
+            xRational = vertical ? new Rational(middle.getX()) : Rational.dividedBy(Rational.minus(yRational, b), a);
+        }
+
+        Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
+        Coordinate newCoordinate = findClosestUnusedCoordinate(gs, nearestValidCoordinate, width, height);
+        return newCoordinate;
+    }
+
+
+    @Override
+    public GameMove minimizeCrossings(GameMove lastMove) {
+        GameMove move;
+        try {
+            move = getMinimizerMove(lastMove);
+        } catch (Exception e) {
+            System.err.println("Exception! Performing random move...");
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
+    }
+
+    private GameMove getMinimizerMove(GameMove lastMove) {
+        // First: Apply the last move by the opponent if there is one.
+        applyLastMove(lastMove, gs);
+        GameMove move = randomMove(g, gs, r, width, height);
+        // If there is no placed vertex return random move
+        if (gs.getPlacedVertices().isEmpty()) {
             return move;
         }
 
         HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
-        Iterator<Map.Entry<Vertex, HashSet<Vertex>>> freeNeighboursIterator = freeNeighboursOfPlacedVertices.entrySet().iterator();
         Vertex placedVertex = null;
         Vertex freeVertex = null;
         int i = 0;
-        while (!freeNeighboursOfPlacedVertices.entrySet().isEmpty() && freeNeighboursIterator.hasNext()){
-            Map.Entry<Vertex, HashSet<Vertex>> entry = freeNeighboursIterator.next();
+        for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
             placedVertex = entry.getKey();
-            if (entry.getValue().iterator().hasNext()){
+            if (entry.getValue().iterator().hasNext()) {
                 freeVertex = entry.getValue().iterator().next();
                 break;
             }
         }
         Coordinate closestCoordinate = findClosestUnusedCoordinate(gs, placedVertex, width, height);
-        move = new GameMove(freeVertex,closestCoordinate);
-        gs.applyMove(move);
+        move = new GameMove(freeVertex, closestCoordinate);
         return move;
     }
-
 
 
     @Override
@@ -104,6 +179,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return name;
+        return "Group 10 - ProjectionPlayer";
     }
 }
