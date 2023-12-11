@@ -153,7 +153,6 @@ public class ProjectionPlayer implements NewPlayer {
         HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
         Vertex placedVertex = null;
         Vertex freeVertex = null;
-        int i = 0;
         for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
             placedVertex = entry.getKey();
             if (entry.getValue().iterator().hasNext()) {
@@ -178,6 +177,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return "Group 10 - ProjectionPlayer";
+        return "Gruppe 10";
     }
 }
