@@ -99,6 +99,31 @@ public class Util {
         return neighbors;
     }
 
+    public static Coordinate findClosestUnusedCoordinateMiddle(GameState gs, Coordinate coordinate, int width, int height) {
+        Coordinate middle = new Coordinate(width / 2, height / 2);
+        Coordinate result = findClosestUnusedCoordinate(gs, coordinate,width, height);
+        int[][] usedCoordinates = gs.getUsedCoordinates();
+
+        Coordinate vectorToMiddle = new Coordinate(coordinate.getX() - middle.getX(), coordinate.getY() - middle.getY());
+        double distanceToMiddle = distance(middle, coordinate);
+        Coordinate normVectorToMiddle = new Coordinate((int)(vectorToMiddle.getX() / distanceToMiddle), (int)(vectorToMiddle.getY()/distanceToMiddle));
+        int maxRange = Math.min(width, height)/2;
+        Coordinate currentCoordinate = coordinate;
+        int newX = currentCoordinate.getX();
+        int newY = currentCoordinate.getY();
+
+        for (int i = 0; i <= maxRange; i++) {
+            if (isValidCoordinate(currentCoordinate, width, height) && (usedCoordinates[newX][newY] == 0)) {
+                return currentCoordinate;
+            }
+            newY = normVectorToMiddle.getY() + currentCoordinate.getY();
+            newX = normVectorToMiddle.getX() + currentCoordinate.getX();
+            currentCoordinate = new Coordinate(newX, newY);
+        }
+        // Fall-back: no unused coordinate found
+        return result;
+    }
+
     public static Coordinate findClosestUnusedCoordinate(GameState gs, Coordinate coordinate, int width, int height) {
         Coordinate result = new Coordinate(-1, -1);
         int[][] usedCoordinates = gs.getUsedCoordinates();

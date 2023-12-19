@@ -38,10 +38,19 @@ public class ProjectionPlayer implements NewPlayer {
     private int height;
 
     /**
+     * Is used to alternate between different modes for the choice of the candidate vertex
+     */
+    private int alternator;
+
+    private GameMove lastRoundLastMove;
+
+    /**
      * Creates a projection player with the assigned name.
      */
     public ProjectionPlayer() {
+        this.alternator = 0;
         this.r = new Random();
+        this.lastRoundLastMove = null;
     }
 
     @Override
@@ -57,6 +66,7 @@ public class ProjectionPlayer implements NewPlayer {
     }
 
     private GameMove getMaximizerMove(GameMove lastMove) throws Exception {
+        int modulus = 10;
         // First: Apply the last move by the opponent if there is one.
         applyLastMove(lastMove, gs);
         GameMove move = randomMove(g, gs, r, width, height);
@@ -67,17 +77,26 @@ public class ProjectionPlayer implements NewPlayer {
 
         //get a free neighbor of the previously placed vertex if there is one
         //get any free neighbor of any placed vertex else
-        HashSet<Vertex> candidateNeighbors = getFreeNeighbors(lastMove.getVertex(), g, gs);
-        Vertex freeNeighbor;
         Vertex placedVertex = lastMove.getVertex();
-        if (candidateNeighbors.isEmpty()) {
+        if (alternator % modulus == 1){
+            move = randomMove(g, gs, r, width, height);
+            lastRoundLastMove = move;
+            return move;
+        } else if (alternator % modulus == 2) {
+            placedVertex = lastRoundLastMove.getVertex();
+        }
+        HashSet<Vertex> candidateNeighbors = getFreeNeighbors(placedVertex, g, gs);
+
+        Vertex freeNeighbor;
+
+        if (candidateNeighbors.isEmpty() || alternator % modulus == 0) {
             Map<Vertex, Vertex> placedVertexAndFreeNeighbor = getAnyFreeNeighbor(g, gs);
             placedVertex = placedVertexAndFreeNeighbor.keySet().iterator().next();
             freeNeighbor = placedVertexAndFreeNeighbor.get(placedVertex);
         } else {
             freeNeighbor = candidateNeighbors.iterator().next();
         }
-
+        alternator++;
 
         //find projection through the middle
         Coordinate newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
@@ -124,7 +143,7 @@ public class ProjectionPlayer implements NewPlayer {
         }
 
         Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
-        return findClosestUnusedCoordinate(gs, nearestValidCoordinate, width, height);
+        return findClosestUnusedCoordinateMiddle(gs, nearestValidCoordinate, width, height);
     }
 
 
@@ -134,7 +153,6 @@ public class ProjectionPlayer implements NewPlayer {
         try {
             move = getMinimizerMove(lastMove);
         } catch (Exception e) {
-            System.err.println("Exception! Performing random move...");
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -177,6 +195,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return "Gruppe 10";
+        return "new Gruppe 10";
     }
 }
