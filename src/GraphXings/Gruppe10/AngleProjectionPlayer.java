@@ -15,7 +15,12 @@ import java.util.Random;
 
 import static GraphXings.Gruppe10.Util.*;
 
-public class ProjectionPlayer implements NewPlayer {
+public class AngleProjectionPlayer implements NewPlayer {
+    /**
+	 * The name of the random player.
+	 */
+	private String name;
+
     /**
      * A random number generator.
      */
@@ -47,7 +52,8 @@ public class ProjectionPlayer implements NewPlayer {
     /**
      * Creates a projection player with the assigned name.
      */
-    public ProjectionPlayer() {
+    public AngleProjectionPlayer(String name) {
+        this.name = name;
         this.alternator = 0;
         this.r = new Random();
         this.lastRoundLastMove = null;
@@ -57,7 +63,7 @@ public class ProjectionPlayer implements NewPlayer {
     public GameMove maximizeCrossings(GameMove lastMove) {
         GameMove move;
         try {
-            move = getMaximizerMove(lastMove);
+            move = getMaximizerMove(lastMove, false);
         } catch (Exception e) {
             move = randomMove(g, gs, r, width, height);
         }
@@ -65,7 +71,7 @@ public class ProjectionPlayer implements NewPlayer {
         return move;
     }
 
-    private GameMove getMaximizerMove(GameMove lastMove) throws Exception {
+    private GameMove getMaximizerMove(GameMove lastMove, Boolean crossingAngle) throws Exception {
         int modulus = 10;
         // First: Apply the last move by the opponent if there is one.
         applyLastMove(lastMove, gs);
@@ -98,8 +104,17 @@ public class ProjectionPlayer implements NewPlayer {
         }
         alternator++;
 
-        //find projection through the middle
-        Coordinate newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
+        //find projection 
+        Coordinate newCoordinate = new Coordinate(0,0);
+        if(crossingAngle) // projection with randomised angle
+        {
+             newCoordinate = getProjectionWithRandomizedAngle(placedVertex);
+        }
+         
+        else // projection through middle 
+        {
+             newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
+        }
 
         if (!isValidCoordinate(newCoordinate, width, height) || gs.getUsedCoordinates()[newCoordinate.getX()][newCoordinate.getY()] != 0) {
             throw new Exception();
@@ -109,6 +124,7 @@ public class ProjectionPlayer implements NewPlayer {
     }
 
     private Coordinate getProjectionOnBorderThroughMiddle(Vertex placedVertex) {
+ 
         Rational xRational;
         Rational yRational;
         Coordinate placedVertexCoordinate = gs.getVertexCoordinates().get(placedVertex);
@@ -121,6 +137,7 @@ public class ProjectionPlayer implements NewPlayer {
             a = null;
             b = null;
         } else {
+           
             int deltaY = middle.getY() - placedVertexCoordinate.getY();
             int deltaX = middle.getX() - placedVertexCoordinate.getX();
             a = new Rational(deltaY, deltaX);
@@ -144,6 +161,50 @@ public class ProjectionPlayer implements NewPlayer {
 
         Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
         return findClosestUnusedCoordinateMiddle(gs, nearestValidCoordinate, width, height);
+    }
+
+    private Coordinate getProjectionWithRandomizedAngle(Vertex placedvertex)
+    {
+    Rational xRational;
+    Rational yRational;
+    Coordinate placedVertexCoordinate = gs.getVertexCoordinates().get(placedvertex);
+
+    // Introduce random component to the angle and intercept calculation
+    long numeratorA = (long) (Math.random() * height);
+    long denominatorA = (long) (Math.random() * width) + 1; 
+    Rational a = new Rational(numeratorA, denominatorA); // Slope
+
+    // Random intercept between 0 and height
+    long numeratorB = (long) (Math.random() * height);
+    long denominatorB = 1; 
+    Rational b = new Rational(numeratorB, denominatorB);
+
+    // Alternative:
+/*     Coordinate middle = new Coordinate(width / 2, height / 2);
+    Rational b = Rational.minus(new Rational(middle.getY()), Rational.times(a, new Rational(middle.getX()))); */
+
+
+    // Check if the line is vertical
+    boolean vertical = numeratorA == 0 && denominatorA != 0; 
+
+    Rational zero = new Rational(0);
+    Rational heightRational = new Rational(height);
+
+    if (!vertical && (!Rational.lesserEqual(b, zero) || Rational.equals(b, zero)) && Rational.lesserEqual(b, heightRational)) {
+        // intersects left and right boundary
+        yRational = b;
+        // decide if left or right depending on the position of placed vertex left or right of the middle
+        xRational = new Rational(placedVertexCoordinate.getX() > width / 2 ? width : 0);
+    } else {
+        // intersects top and bottom boundary
+        // decide if top or bottom depending on the position of placed vertex above or below the middle
+        yRational = new Rational(placedVertexCoordinate.getY() > height / 2 ? height : 0);
+        // yRational = a*x+b --> (yRational - b) / a = x(Rational)
+        xRational = vertical ? new Rational(width / 2) : Rational.dividedBy(Rational.minus(yRational, b), a);
+    }
+
+    Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
+    return findClosestUnusedCoordinateMiddle(gs, nearestValidCoordinate, width, height);
     }
 
 
@@ -186,33 +247,27 @@ public class ProjectionPlayer implements NewPlayer {
     @Override
 	public GameMove maximizeCrossingAngles(GameMove lastMove)
 	{
-		// First: Apply the last move by the opponent.
-		if (lastMove != null)
-		{
-			gs.applyMove(lastMove);
-		}
-		// Second: Compute the new move.
-		GameMove randomMove = randomMove(g, gs, r, width, height);
-		// Third: Apply the new move to the local GameState.
-		gs.applyMove(randomMove);
-		// Finally: Return the new move.
-		return randomMove;
+	        GameMove move;
+        try {
+            move = getMaximizerMove(lastMove, true);
+        } catch (Exception e) {
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
 	}
 
 	@Override
 	public GameMove minimizeCrossingAngles(GameMove lastMove)
 	{
-		// First: Apply the last move by the opponent.
-		if (lastMove != null)
-		{
-			gs.applyMove(lastMove);
-		}
-		// Second: Compute the new move.
-		GameMove randomMove = randomMove(g, gs, r, width, height);
-		// Third: Apply the new move to the local GameState.
-		gs.applyMove(randomMove);
-		// Finally: Return the new move.
-		return randomMove;
+        GameMove move;
+        try {
+            move = getMinimizerMove(lastMove);
+        } catch (Exception e) {
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
 	}
 
     
@@ -229,6 +284,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return "new Gruppe 10";
+        return name;
     }
 }
