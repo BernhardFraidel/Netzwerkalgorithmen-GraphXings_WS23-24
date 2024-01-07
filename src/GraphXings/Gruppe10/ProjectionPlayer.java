@@ -205,6 +205,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return "new Gruppe 10";
+        return "Gruppe 10";
     }
 }
