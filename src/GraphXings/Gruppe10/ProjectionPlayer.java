@@ -130,10 +130,10 @@ public class ProjectionPlayer implements NewPlayer {
         Rational zero = new Rational(0);
         Rational heightRational = new Rational(height);
         if (!vertical && (!Rational.lesserEqual(b, zero) || Rational.equals(b, zero)) && Rational.lesserEqual(b, heightRational)) {
-            //intersects left and right boundary
-            yRational = b;
             //decide if left or right depending on position of placed vertex left or right of the middle
             xRational = new Rational(placedVertexCoordinate.getX() > middle.getX() ? width : 0);
+            //intersects left and right boundary
+            yRational = (placedVertexCoordinate.getX() > middle.getX()) ? b : Rational.plus(Rational.times(a, xRational), b);
         } else {
             //intersects top and bottom boundary
             //decide if top or bottom depending on position of placed vertex above or below the middle
