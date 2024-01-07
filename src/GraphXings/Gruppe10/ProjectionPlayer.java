@@ -159,6 +159,16 @@ public class ProjectionPlayer implements NewPlayer {
         return move;
     }
 
+    @Override
+    public GameMove maximizeCrossingAngles(GameMove lastMove) {
+        return randomMove(g, gs, r, width, height);
+    }
+
+    @Override
+    public GameMove minimizeCrossingAngles(GameMove lastMove) {
+        return randomMove(g, gs, r, width, height);
+    }
+
     private GameMove getMinimizerMove(GameMove lastMove) {
         // First: Apply the last move by the opponent if there is one.
         applyLastMove(lastMove, gs);
