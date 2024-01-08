@@ -73,6 +73,19 @@ public class Util {
     }
 
     /**
+     * Gets any free (unplaced) vertex.
+     * @return any free vertex or null if there are no free vertices.
+     */
+    public static Vertex getAnyFreeVertex(Graph g, GameState gs) {
+        for (Vertex v : g.getVertices()) {
+            if (!gs.getPlacedVertices().contains(v)) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    /**
      * For all placed Vertices P get the Neighbourhood N(P) where n in N(P), but not in P
      *
      * @return Map every vertex p in P to its Neighbourhood N(p) if N(p) is not empty (List of Vertex)
@@ -99,15 +112,25 @@ public class Util {
         return neighbors;
     }
 
+    public static Vertex getAnyFreeNeighborOfVertexSet(Set<Vertex> vertices, Graph g, GameState gs) {
+        for (Vertex v : vertices) {
+            Vertex freeNeighbor = getFreeNeighbors(v, g, gs).iterator().next();
+            if (freeNeighbor != null) {
+                return freeNeighbor;
+            }
+        }
+        return null;
+    }
+
     public static Coordinate findClosestUnusedCoordinateMiddle(GameState gs, Coordinate coordinate, int width, int height) {
         Coordinate middle = new Coordinate(width / 2, height / 2);
-        Coordinate result = findClosestUnusedCoordinate(gs, coordinate,width, height);
+        Coordinate result = findClosestUnusedCoordinate(gs, coordinate, width, height);
         int[][] usedCoordinates = gs.getUsedCoordinates();
 
         Coordinate vectorToMiddle = new Coordinate(coordinate.getX() - middle.getX(), coordinate.getY() - middle.getY());
         double distanceToMiddle = distance(middle, coordinate);
-        Coordinate normVectorToMiddle = new Coordinate((int)(vectorToMiddle.getX() / distanceToMiddle), (int)(vectorToMiddle.getY()/distanceToMiddle));
-        int maxRange = Math.min(width, height)/2;
+        Coordinate normVectorToMiddle = new Coordinate((int) (vectorToMiddle.getX() / distanceToMiddle), (int) (vectorToMiddle.getY() / distanceToMiddle));
+        int maxRange = Math.min(width, height) / 2;
         Coordinate currentCoordinate = coordinate;
         int newX = currentCoordinate.getX();
         int newY = currentCoordinate.getY();
