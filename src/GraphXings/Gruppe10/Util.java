@@ -66,10 +66,14 @@ public class Util {
      * @return a singleton map mapping any placed vertex to any of its free neighbors
      */
     public static Map<Vertex, Vertex> getAnyFreeNeighbor(Graph g, GameState gs) {
-        Map.Entry<Vertex, HashSet<Vertex>> anyEntry = getFreeNeighborsOfPlacedVertices(g, gs).entrySet().iterator().next();
-        Vertex placedVertex = anyEntry.getKey();
-        Vertex freeNeighbor = anyEntry.getValue().iterator().next();
-        return Collections.singletonMap(placedVertex, freeNeighbor);
+        try {
+            Map.Entry<Vertex, HashSet<Vertex>> anyEntry = getFreeNeighborsOfPlacedVertices(g, gs).entrySet().iterator().next();
+            Vertex placedVertex = anyEntry.getKey();
+            Vertex freeNeighbor = anyEntry.getValue().iterator().next();
+            return Collections.singletonMap(placedVertex, freeNeighbor);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     /**
@@ -113,11 +117,14 @@ public class Util {
     }
 
     public static Vertex getAnyFreeNeighborOfVertexSet(Set<Vertex> vertices, Graph g, GameState gs) {
-        for (Vertex v : vertices) {
-            Vertex freeNeighbor = getFreeNeighbors(v, g, gs).iterator().next();
-            if (freeNeighbor != null) {
-                return freeNeighbor;
+        try {
+            for (Vertex v : vertices) {
+                Vertex freeNeighbor = getFreeNeighbors(v, g, gs).iterator().next();
+                if (freeNeighbor != null) {
+                    return freeNeighbor;
+                }
             }
+        } catch (NoSuchElementException ignored) {
         }
         return null;
     }

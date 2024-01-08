@@ -7,6 +7,8 @@ import GraphXings.Game.League.NewLeague;
 import GraphXings.Game.League.NewLeagueResult;
 import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
+import GraphXings.Gruppe10.LighthousePlayer;
+
 import java.util.ArrayList;
 
 public class GraphXings
@@ -15,8 +17,7 @@ public class GraphXings
     {
         ArrayList<NewPlayer> players = new ArrayList<>();
         players.add(new NewRandomPlayer("R1"));
-        players.add(new NewRandomPlayer("R2"));
-        players.add(new NewRandomPlayer("R3"));
+        players.add(new LighthousePlayer());
         long timeLimit = 300000000000l;
         long seed = 27081883;
         int bestOf = 1;

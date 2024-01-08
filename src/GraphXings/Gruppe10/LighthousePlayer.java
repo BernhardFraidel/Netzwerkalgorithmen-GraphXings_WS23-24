@@ -8,6 +8,7 @@ import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
 
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 
@@ -45,6 +46,7 @@ public class LighthousePlayer implements NewPlayer {
         try {
             move = getMaximizeAngleMove();
         } catch (Exception e) {
+            e.printStackTrace();
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -61,12 +63,13 @@ public class LighthousePlayer implements NewPlayer {
             verticesPartitionB.add(v);
         }
         Coordinate coordinate = getCoordinate();
+//        System.out.println(coordinate);
         GameMove move = new GameMove(v, coordinate);
 
         //adjust step and alternator values for next round
         alternator++;
         int shorterSideValue = widthIsShorter ? width : height;
-        innerLoopStep++;
+        if (alternator % 2 == 0) innerLoopStep++;
         outerLoopStep += innerLoopStep / shorterSideValue;
         innerLoopStep %= shorterSideValue;
 
@@ -80,7 +83,11 @@ public class LighthousePlayer implements NewPlayer {
         if (previouslyPlacedVertex == null) {
             v = getAnyFreeVertex(g, gs);
         } else {
-            v = getFreeNeighbors(previouslyPlacedVertex, g, gs).iterator().next();
+            try {
+                v = getFreeNeighbors(previouslyPlacedVertex, g, gs).iterator().next();
+            } catch (NoSuchElementException e) {
+                v = null;
+            }
         }
 
         //get a free neighbor of the opposing partition if the previously placed vertex has no free neighbors
@@ -135,6 +142,8 @@ public class LighthousePlayer implements NewPlayer {
         } else {
             this.projectionPlayerMinimizer = null;
         }
+//        System.out.println("Vertices: " + g.getN());
+//        System.out.println("field: " + width + " x " + height);
     }
 
     @Override
