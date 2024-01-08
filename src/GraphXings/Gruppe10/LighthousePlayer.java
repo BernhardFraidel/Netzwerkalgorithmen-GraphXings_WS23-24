@@ -46,7 +46,6 @@ public class LighthousePlayer implements NewPlayer {
         try {
             move = getMaximizeAngleMove();
         } catch (Exception e) {
-            e.printStackTrace();
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -63,15 +62,14 @@ public class LighthousePlayer implements NewPlayer {
             verticesPartitionB.add(v);
         }
         Coordinate coordinate = getCoordinate();
-//        System.out.println(coordinate);
         GameMove move = new GameMove(v, coordinate);
 
         //adjust step and alternator values for next round
         alternator++;
-        int shorterSideValue = widthIsShorter ? width : height;
+        int modulus = (widthIsShorter ? width : height) / 3;
         if (alternator % 2 == 0) innerLoopStep++;
-        outerLoopStep += innerLoopStep / shorterSideValue;
-        innerLoopStep %= shorterSideValue;
+        outerLoopStep += innerLoopStep / modulus;
+        innerLoopStep %= modulus;
 
         return move;
     }
@@ -142,8 +140,6 @@ public class LighthousePlayer implements NewPlayer {
         } else {
             this.projectionPlayerMinimizer = null;
         }
-//        System.out.println("Vertices: " + g.getN());
-//        System.out.println("field: " + width + " x " + height);
     }
 
     @Override
