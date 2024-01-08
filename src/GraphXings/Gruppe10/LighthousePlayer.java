@@ -7,10 +7,7 @@ import GraphXings.Data.Vertex;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static GraphXings.Gruppe10.Util.*;
 
@@ -19,7 +16,6 @@ public class LighthousePlayer implements NewPlayer {
     private int width;
     private int height;
     private GameState gs;
-    private ProjectionPlayer projectionPlayerMinimizer;
     private Random r;
     private int innerLoopStep;
     private int outerLoopStep;
@@ -44,7 +40,7 @@ public class LighthousePlayer implements NewPlayer {
         applyLastMove(lastMove, gs);
         GameMove move;
         try {
-            move = getMaximizeAngleMove();
+            move = getMaximizerAngleMove();
         } catch (Exception e) {
             move = randomMove(g, gs, r, width, height);
         }
@@ -52,7 +48,7 @@ public class LighthousePlayer implements NewPlayer {
         return move;
     }
 
-    private GameMove getMaximizeAngleMove() {
+    private GameMove getMaximizerAngleMove() {
         Vertex v = getVertexToPlace();
         previouslyPlacedVertex = v;
         //save vertex to be placed into corresponding partition
@@ -119,7 +115,38 @@ public class LighthousePlayer implements NewPlayer {
 
     @Override
     public GameMove minimizeCrossingAngles(GameMove lastMove) {
-        return this.projectionPlayerMinimizer.minimizeCrossings(lastMove);
+        applyLastMove(lastMove, gs);
+        GameMove move;
+        try {
+            move = getMinimizerAngleMove();
+        } catch (Exception e) {
+            System.err.println("e");
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
+    }
+
+    private GameMove getMinimizerAngleMove() {
+        GameMove move = randomMove(g, gs, r, width, height);
+        // If there is no placed vertex return random move
+        if (gs.getPlacedVertices().isEmpty()) {
+            return move;
+        }
+
+        HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
+        Vertex placedVertex = null;
+        Vertex freeVertex = null;
+        for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
+            placedVertex = entry.getKey();
+            if (entry.getValue().iterator().hasNext()) {
+                freeVertex = entry.getValue().iterator().next();
+                break;
+            }
+        }
+        Coordinate closestCoordinate = findClosestUnusedCoordinate(gs, placedVertex, width, height);
+        move = new GameMove(freeVertex, closestCoordinate);
+        return move;
     }
 
     @Override
@@ -134,12 +161,6 @@ public class LighthousePlayer implements NewPlayer {
         this.widthIsShorter = width < height;
         this.verticesPartitionA = new HashSet<>();
         this.verticesPartitionB = new HashSet<>();
-        if (role.equals(Role.MIN_ANGLE)) {
-            this.projectionPlayerMinimizer = new ProjectionPlayer();
-            this.projectionPlayerMinimizer.initializeNextRound(g, width, height, Role.MIN);
-        } else {
-            this.projectionPlayerMinimizer = null;
-        }
     }
 
     @Override
