@@ -1,15 +1,7 @@
 package GUI;
-
 import javax.swing.*;
-
-import org.w3c.dom.Node;
-
 import java.awt.*;
-import GraphXings.Data.*;
 import GraphXings.Game.GuiGameResult;
-import GraphXings.Game.NewGameResult;
-
-import java.util.Random;
 
 
 public class GraphPanel extends JPanel 

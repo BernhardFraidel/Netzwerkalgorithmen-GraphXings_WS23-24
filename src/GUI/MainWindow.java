@@ -2,44 +2,18 @@ package GUI;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
-
 import GraphXings.Algorithms.NewPlayer;
-import GraphXings.Algorithms.NewRandomPlayer;
-import GraphXings.Game.Match.NewMatch;
-import GraphXings.Game.Match.NewMatch.MatchType;
-
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import javax.swing.event.*;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Vector;
-
-import GraphXings.Algorithms.NewPlayer;
-import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Game.GuiGameResult;
 import GraphXings.Game.NewGame;
 import GraphXings.Game.NewGameResult;
 import GraphXings.Game.GameInstance.*;
-import GraphXings.Game.League.NewLeague;
-import GraphXings.Game.League.NewLeagueResult;
-import GraphXings.Game.Match.NewMatch;
-import GraphXings.Game.Match.NewMatchResult;
-
-import GraphXings.Data.Graph;
-
-
-
 
 /**
  * The class mainWindows holds the frame of the mainwindow. It is implemented as a SINGLETON.
@@ -531,9 +505,9 @@ public class MainWindow extends JFrame implements ActionListener, PropertyChange
     private JMenu SimulationMenu;
 
     // result labels
-    private JLabel numCurrentGameLabel;
-    private JLabel firstPlayerLabel;
-    private JLabel secondPlayerLabel;
+    //private JLabel numCurrentGameLabel;
+    //private JLabel firstPlayerLabel;
+    //private JLabel secondPlayerLabel;
     private JLabel gameWonLabel;
 
     private JSplitPane mainPanel;

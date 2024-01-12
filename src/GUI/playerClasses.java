@@ -1,14 +1,13 @@
 package GUI;
 
 import java.util.Collection;
-import java.util.HashMap;
-
-import java.util.EnumSet;
+import java.util.*;
 
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Gruppe10.ProjectionPlayer;
 import GraphXings.Gruppe10.AngleProjectionPlayer;
+import GraphXings.Gruppe10.LighthousePlayer;
 
 public class playerClasses 
 {
@@ -24,6 +23,7 @@ public class playerClasses
         addPlayer(0, "Random Player");
         addPlayer(1, "Projection Player");
         addPlayer(2, "Angle Projection Player");
+        addPlayer(3, "Lighthouse Player");
     }
 
 
@@ -76,6 +76,9 @@ public class playerClasses
             case 2:
                 return new AngleProjectionPlayer(name);
 
+            case 3:
+                return new LighthousePlayer();
+
             default:
                 return null;
         }
@@ -95,6 +98,9 @@ public class playerClasses
 
             case 2:
                 return new AngleProjectionPlayer(name(type));
+
+            case 3:
+                return new LighthousePlayer();
 
             default:
                 return null;

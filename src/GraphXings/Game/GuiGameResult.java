@@ -1,8 +1,7 @@
 package GraphXings.Game;
 
 import GraphXings.Data.*;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Vector; 
 public class GuiGameResult 
 {
@@ -23,9 +22,9 @@ public class GuiGameResult
     public GuiGameResult(Graph g, GameState state, String maximizer, String minimizer)
     {
         //HashSet<Vertex> vertices = (HashSet<Vertex>) g.getVertices();
-        HashSet<Vertex> vertices = (HashSet<Vertex>) state.getPlacedVertices();
+        LinkedHashSet<Vertex> vertices = (LinkedHashSet<Vertex>) state.getPlacedVertices();
         HashSet<Edge> edges = (HashSet<Edge>) g.getEdges();
-        HashMap<Vertex, Coordinate> vertexCoordinates = state.getVertexCoordinates();
+        LinkedHashMap<Vertex, Coordinate> vertexCoordinates = (LinkedHashMap<Vertex, Coordinate>)state.getVertexCoordinates();
 
         this.maximizerPlayer = maximizer;
         this.minimizerPlayer = minimizer;
@@ -37,9 +36,9 @@ public class GuiGameResult
     public GuiGameResult(Graph g, GameState state)
     {
         //HashSet<Vertex> vertices = (HashSet<Vertex>) g.getVertices();
-        HashSet<Vertex> vertices = (HashSet<Vertex>) state.getPlacedVertices();
+        LinkedHashSet<Vertex> vertices = (LinkedHashSet<Vertex>) state.getPlacedVertices();
         HashSet<Edge> edges = (HashSet<Edge>) g.getEdges();
-        HashMap<Vertex, Coordinate> vertexCoordinates = state.getVertexCoordinates();
+        LinkedHashMap<Vertex, Coordinate> vertexCoordinates = (LinkedHashMap<Vertex, Coordinate>)state.getVertexCoordinates();
 
         this.maximizerPlayer = "Maximizer not set";
         this.minimizerPlayer = "Minimizer not set";
@@ -48,7 +47,7 @@ public class GuiGameResult
         recalculateWidthHeight();
     }
 
-    private void calcCoords(HashSet<Vertex> vertices, HashSet<Edge> edges, HashMap<Vertex, Coordinate> vertexCoordinates)
+    private void calcCoords(LinkedHashSet<Vertex> vertices, HashSet<Edge> edges, LinkedHashMap<Vertex, Coordinate> vertexCoordinates)
     {
         vertexCoords = new Vector<Coordinate>();
         edgeCoords1 = new Vector<Coordinate>();

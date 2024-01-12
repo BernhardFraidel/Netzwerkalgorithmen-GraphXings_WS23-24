@@ -66,10 +66,27 @@ public class Util {
      * @return a singleton map mapping any placed vertex to any of its free neighbors
      */
     public static Map<Vertex, Vertex> getAnyFreeNeighbor(Graph g, GameState gs) {
-        Map.Entry<Vertex, HashSet<Vertex>> anyEntry = getFreeNeighborsOfPlacedVertices(g, gs).entrySet().iterator().next();
-        Vertex placedVertex = anyEntry.getKey();
-        Vertex freeNeighbor = anyEntry.getValue().iterator().next();
-        return Collections.singletonMap(placedVertex, freeNeighbor);
+        try {
+            Map.Entry<Vertex, HashSet<Vertex>> anyEntry = getFreeNeighborsOfPlacedVertices(g, gs).entrySet().iterator().next();
+            Vertex placedVertex = anyEntry.getKey();
+            Vertex freeNeighbor = anyEntry.getValue().iterator().next();
+            return Collections.singletonMap(placedVertex, freeNeighbor);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets any free (unplaced) vertex.
+     * @return any free vertex or null if there are no free vertices.
+     */
+    public static Vertex getAnyFreeVertex(Graph g, GameState gs) {
+        for (Vertex v : g.getVertices()) {
+            if (!gs.getPlacedVertices().contains(v)) {
+                return v;
+            }
+        }
+        return null;
     }
 
     /**
@@ -99,15 +116,28 @@ public class Util {
         return neighbors;
     }
 
+    public static Vertex getAnyFreeNeighborOfVertexSet(Set<Vertex> vertices, Graph g, GameState gs) {
+        try {
+            for (Vertex v : vertices) {
+                Vertex freeNeighbor = getFreeNeighbors(v, g, gs).iterator().next();
+                if (freeNeighbor != null) {
+                    return freeNeighbor;
+                }
+            }
+        } catch (NoSuchElementException ignored) {
+        }
+        return null;
+    }
+
     public static Coordinate findClosestUnusedCoordinateMiddle(GameState gs, Coordinate coordinate, int width, int height) {
         Coordinate middle = new Coordinate(width / 2, height / 2);
-        Coordinate result = findClosestUnusedCoordinate(gs, coordinate,width, height);
+        Coordinate result = findClosestUnusedCoordinate(gs, coordinate, width, height);
         int[][] usedCoordinates = gs.getUsedCoordinates();
 
         Coordinate vectorToMiddle = new Coordinate(coordinate.getX() - middle.getX(), coordinate.getY() - middle.getY());
         double distanceToMiddle = distance(middle, coordinate);
-        Coordinate normVectorToMiddle = new Coordinate((int)(vectorToMiddle.getX() / distanceToMiddle), (int)(vectorToMiddle.getY()/distanceToMiddle));
-        int maxRange = Math.min(width, height)/2;
+        Coordinate normVectorToMiddle = new Coordinate((int) (vectorToMiddle.getX() / distanceToMiddle), (int) (vectorToMiddle.getY() / distanceToMiddle));
+        int maxRange = Math.min(width, height) / 2;
         Coordinate currentCoordinate = coordinate;
         int newX = currentCoordinate.getX();
         int newY = currentCoordinate.getY();

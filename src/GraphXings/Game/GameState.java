@@ -3,9 +3,9 @@ package GraphXings.Game;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+//import java.util.HashMap;
+//import java.util.HashSet;
 
 /**
  * A class describing the current state of the game.
@@ -15,15 +15,15 @@ public class GameState
 	/**
 	 * The set of vertices contained in the graph.
 	 */
-	private HashSet<Vertex> vertices;
+	private LinkedHashSet<Vertex> vertices;
 	/**
 	 * A HashMap mapping vertices to their coordinates if already placed.
 	 */
-	private HashMap<Vertex, Coordinate> vertexCoordinates;
+	private LinkedHashMap<Vertex, Coordinate> vertexCoordinates;
 	/**
 	 * A collection of vertices that have already been placed.
 	 */
-	private HashSet<Vertex> placedVertices;
+	private LinkedHashSet<Vertex> placedVertices;
 	/**
 	 * The width of the drawing.
 	 */
@@ -45,13 +45,13 @@ public class GameState
 	 */
 	public GameState(Graph g, int width, int height)
 	{
-		vertices = new HashSet<>();
+		vertices = new LinkedHashSet<>();
 		for (Vertex v : g.getVertices())
 		{
 			vertices.add(v);
 		}
-		vertexCoordinates = new HashMap<>();
-		placedVertices = new HashSet<>();
+		vertexCoordinates = new LinkedHashMap<>();
+		placedVertices = new LinkedHashSet<>();
 		usedCoordinates = new int[width][height];
 		for (int x = 0; x < width; x++)
 		{
@@ -111,7 +111,7 @@ public class GameState
 	 * Gets the set of placed vertices.
 	 * @return The set of placed vertices.
 	 */
-	public HashSet<Vertex> getPlacedVertices()
+	public LinkedHashSet<Vertex> getPlacedVertices()
 	{
 		return placedVertices;
 	}
@@ -120,7 +120,7 @@ public class GameState
 	 * Gets the coordinates assigned to vertices.
 	 * @return A HashMap describing the coordinate of vertices.
 	 */
-	public HashMap<Vertex, Coordinate> getVertexCoordinates()
+	public LinkedHashMap<Vertex, Coordinate> getVertexCoordinates()
 	{
 		return vertexCoordinates;
 	}
