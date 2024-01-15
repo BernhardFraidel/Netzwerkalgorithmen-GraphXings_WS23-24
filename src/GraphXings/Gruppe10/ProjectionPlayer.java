@@ -130,10 +130,10 @@ public class ProjectionPlayer implements NewPlayer {
         Rational zero = new Rational(0);
         Rational heightRational = new Rational(height);
         if (!vertical && (!Rational.lesserEqual(b, zero) || Rational.equals(b, zero)) && Rational.lesserEqual(b, heightRational)) {
-            //intersects left and right boundary
-            yRational = b;
             //decide if left or right depending on position of placed vertex left or right of the middle
             xRational = new Rational(placedVertexCoordinate.getX() > middle.getX() ? width : 0);
+            //intersects left and right boundary
+            yRational = (placedVertexCoordinate.getX() > middle.getX()) ? b : Rational.plus(Rational.times(a, xRational), b);
         } else {
             //intersects top and bottom boundary
             //decide if top or bottom depending on position of placed vertex above or below the middle
@@ -157,6 +157,16 @@ public class ProjectionPlayer implements NewPlayer {
         }
         gs.applyMove(move);
         return move;
+    }
+
+    @Override
+    public GameMove maximizeCrossingAngles(GameMove lastMove) {
+        return randomMove(g, gs, r, width, height);
+    }
+
+    @Override
+    public GameMove minimizeCrossingAngles(GameMove lastMove) {
+        return randomMove(g, gs, r, width, height);
     }
 
     private GameMove getMinimizerMove(GameMove lastMove) {
@@ -229,6 +239,6 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public String getName() {
-        return "new Gruppe 10";
+        return "Gruppe 10";
     }
 }
