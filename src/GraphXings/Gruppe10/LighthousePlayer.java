@@ -120,7 +120,6 @@ public class LighthousePlayer implements NewPlayer {
         try {
             move = getMinimizerAngleMove();
         } catch (Exception e) {
-            System.err.println("e");
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -161,6 +160,8 @@ public class LighthousePlayer implements NewPlayer {
         this.widthIsShorter = width < height;
         this.verticesPartitionA = new HashSet<>();
         this.verticesPartitionB = new HashSet<>();
+        this.alternator = 0;
+        this.previouslyPlacedVertex = null;
     }
 
     @Override
