@@ -65,7 +65,7 @@ public class LighthousePlayer implements NewPlayer {
 
         //adjust step and alternator values for next round
         alternator++;
-        int modulus = (widthIsShorter ? width : height) / 3;
+        int modulus = (widthIsShorter ? width : height) / 4;
         if (alternator % 2 == 0) innerLoopStep++;
         outerLoopStep += innerLoopStep / modulus;
         innerLoopStep %= modulus;
@@ -175,7 +175,7 @@ public class LighthousePlayer implements NewPlayer {
                 densities.put(3, densities.get(3) + 1);
             }
         }
-        switch (Collections.max(densities.entrySet(), Map.Entry.comparingByValue()).getKey()) {
+        switch (Collections.min(densities.entrySet(), Map.Entry.comparingByValue()).getKey()) {
             case 0:
                 cornerWithLeastDensity = new Coordinate(0, 0);
                 break;
