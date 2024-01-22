@@ -24,6 +24,9 @@ public class LighthousePlayer implements NewPlayer {
     private Set<Vertex> verticesPartitionA;
     private Set<Vertex> verticesPartitionB;
     private boolean widthIsShorter;
+    private int roundCounter;
+    private Coordinate cornerWithLeastDensity;
+    private Role role;
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
@@ -85,7 +88,7 @@ public class LighthousePlayer implements NewPlayer {
         }
 
         //get a free neighbor of the opposing partition if the previously placed vertex has no free neighbors
-        if (v == null) {
+        if (role == Role.MAX_ANGLE && v == null) {
             v = getFreeNeighborOfOpposingPartition();
         }
 
@@ -127,25 +130,65 @@ public class LighthousePlayer implements NewPlayer {
     }
 
     private GameMove getMinimizerAngleMove() {
-        GameMove move = randomMove(g, gs, r, width, height);
-        // If there is no placed vertex return random move
-        if (gs.getPlacedVertices().isEmpty()) {
-            return move;
+        if (roundCounter < 10) {
+            roundCounter++;
+            return getDefaultMinimizerMove(g, gs, r, width, height);
+        } else {
+            return getMinimizerCornerMove();
         }
+    }
 
-        HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
-        Vertex placedVertex = null;
-        Vertex freeVertex = null;
-        for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
-            placedVertex = entry.getKey();
-            if (entry.getValue().iterator().hasNext()) {
-                freeVertex = entry.getValue().iterator().next();
-                break;
+    private GameMove getMinimizerCornerMove() {
+        if (cornerWithLeastDensity == null) {
+            identifyCornerWithLeastDensity();
+        }
+        Vertex v = getVertexToPlace();
+        previouslyPlacedVertex = v;
+        return new GameMove(v, findClosestUnusedCoordinate(gs, cornerWithLeastDensity, width, height));
+    }
+
+    /**
+     * Identifies corner with the least density.
+     * 0 -> topLeft, 1 -> topRight, 2 -> bottomLeft, 3 -> bottomRight
+     */
+    private void identifyCornerWithLeastDensity() {
+        Map<Integer, Integer> densities = new HashMap<>(Map.of(
+                0, 0,
+                1, 0,
+                2, 0,
+                3, 0
+        ));
+
+        //fill out density list
+        for (Coordinate coordinate : gs.getVertexCoordinates().values()) {
+            if (coordinate.getX() < (width / 2) && coordinate.getY() < (height / 2)) {
+                //top left
+                densities.put(0, densities.get(0) + 1);
+            } else if (coordinate.getX() > (width / 2) && coordinate.getY() < (height / 2)) {
+                //top right
+                densities.put(1, densities.get(1) + 1);
+            } else if (coordinate.getX() < (width / 2) && coordinate.getY() > (height / 2)) {
+                //bottom left
+                densities.put(2, densities.get(2) + 1);
+            } else {
+                //bottom right
+                densities.put(3, densities.get(3) + 1);
             }
         }
-        Coordinate closestCoordinate = findClosestUnusedCoordinate(gs, placedVertex, width, height);
-        move = new GameMove(freeVertex, closestCoordinate);
-        return move;
+        switch (Collections.max(densities.entrySet(), Map.Entry.comparingByValue()).getKey()) {
+            case 0:
+                cornerWithLeastDensity = new Coordinate(0, 0);
+                break;
+            case 1:
+                cornerWithLeastDensity = new Coordinate(width, 0);
+                break;
+            case 2:
+                cornerWithLeastDensity = new Coordinate(0, height);
+                break;
+            case 3:
+                cornerWithLeastDensity = new Coordinate(width, height);
+                break;
+        }
     }
 
     @Override
@@ -162,6 +205,9 @@ public class LighthousePlayer implements NewPlayer {
         this.verticesPartitionB = new HashSet<>();
         this.alternator = 0;
         this.previouslyPlacedVertex = null;
+        this.roundCounter = 0;
+        this.cornerWithLeastDensity = null;
+        this.role = role;
     }
 
     @Override
