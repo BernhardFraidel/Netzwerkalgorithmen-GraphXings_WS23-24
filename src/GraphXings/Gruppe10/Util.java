@@ -129,6 +129,28 @@ public class Util {
         return null;
     }
 
+    public static GameMove getDefaultMinimizerMove(Graph g, GameState gs, Random r, int width, int height) {
+        GameMove move = randomMove(g, gs, r, width, height);
+        // If there is no placed vertex return random move
+        if (gs.getPlacedVertices().isEmpty()) {
+            return move;
+        }
+
+        HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
+        Vertex placedVertex = null;
+        Vertex freeVertex = null;
+        for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
+            placedVertex = entry.getKey();
+            if (entry.getValue().iterator().hasNext()) {
+                freeVertex = entry.getValue().iterator().next();
+                break;
+            }
+        }
+        Coordinate closestCoordinate = findClosestUnusedCoordinate(gs, placedVertex, width, height);
+        move = new GameMove(freeVertex, closestCoordinate);
+        return move;
+    }
+
     public static Coordinate findClosestUnusedCoordinateMiddle(GameState gs, Coordinate coordinate, int width, int height) {
         Coordinate middle = new Coordinate(width / 2, height / 2);
         Coordinate result = findClosestUnusedCoordinate(gs, coordinate, width, height);
