@@ -323,8 +323,10 @@ public class MainWindow extends JFrame implements ActionListener, PropertyChange
 
         results = new Vector<GuiGameResult>();
 
+//        factory = new RandomCycleFactory(randomizerSeed, false);
+//        factory = new RandomCycleFactory(randomizerSeed, true);
         factory = new PlanarGameInstanceFactory(randomizerSeed);
-        
+
         runGame();
 
         System.out.printf("Game finished\n");
@@ -478,7 +480,7 @@ public class MainWindow extends JFrame implements ActionListener, PropertyChange
     long timeLimit;
     long randomizerSeed;
     NewGame.Objective gameType;
-    PlanarGameInstanceFactory factory;
+    GameInstanceFactory factory;
     playerClasses classes;
 
     

@@ -166,10 +166,10 @@ public class LighthousePlayer implements NewPlayer {
         //or any free vertex in the first round
         Vertex v;
         if (previouslyPlacedVertex == null) {
-            v = getAnyFreeVertex(g, gs);
+            v = getAnyFreeVertexWithHighestDegree(g, gs);
         } else {
             try {
-                v = getFreeNeighbors(previouslyPlacedVertex, g, gs).iterator().next();
+                v = getFreeNeighborWithHighestDegree(previouslyPlacedVertex, g, gs);
             } catch (NoSuchElementException e) {
                 v = null;
             }
@@ -182,7 +182,7 @@ public class LighthousePlayer implements NewPlayer {
 
         //fallback: get any free vertex
         if (v == null) {
-            v = getAnyFreeVertex(g, gs);
+            v = getAnyFreeVertexWithHighestDegree(g, gs);
         }
         return v;
     }

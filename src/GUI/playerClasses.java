@@ -20,6 +20,7 @@ public class playerClasses {
         addPlayer(0, "Random Player");
         addPlayer(1, "Lighthouse Player");
         addPlayer(2, "Gr8");
+        addPlayer(3, "Gr8 - cycle");
     }
 
 
@@ -63,6 +64,8 @@ public class playerClasses {
 
             case 2:
                 return new EfficientWinningPlayer("Gr8");
+            case 3:
+                return new GraphXings.Gruppe8Cycle.EfficientWinningPlayer("Gr8 - cycle");
 
 
             default:
@@ -82,7 +85,8 @@ public class playerClasses {
                 return new LighthousePlayer();
             case 2:
                 return new EfficientWinningPlayer("Gr8");
-
+            case 3:
+                return new GraphXings.Gruppe8Cycle.EfficientWinningPlayer("Gr8 - cycle");
 
             default:
                 return null;
