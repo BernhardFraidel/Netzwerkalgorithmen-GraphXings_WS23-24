@@ -2,9 +2,7 @@ package GUI;
 
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Algorithms.NewRandomPlayer;
-import GraphXings.Gruppe10.AngleProjectionPlayer;
 import GraphXings.Gruppe10.LighthousePlayer;
-import GraphXings.Gruppe10.LighthousePlayerOld;
 import GraphXings.Gruppe10.ProjectionPlayer;
 import GraphXings.Gruppe8.EfficientWinningPlayer;
 
@@ -22,10 +20,8 @@ public class playerClasses {
         // add new players manually
         addPlayer(0, "Random Player");
         addPlayer(1, "Projection Player");
-        addPlayer(2, "Angle Projection Player");
-        addPlayer(3, "Lighthouse Player");
-        addPlayer(4, "Gr8");
-        addPlayer(5, "Lighthouse Player Old");
+        addPlayer(2, "Lighthouse Player");
+        addPlayer(3, "Gr8");
     }
 
 
@@ -68,14 +64,9 @@ public class playerClasses {
                 return new ProjectionPlayer();
 
             case 2:
-                return new AngleProjectionPlayer(name);
-
-            case 3:
                 return new LighthousePlayer();
-            case 4:
+            case 3:
                 return new EfficientWinningPlayer("Gr8");
-            case 5:
-                return new LighthousePlayerOld();
 
 
             default:
@@ -95,14 +86,9 @@ public class playerClasses {
                 return new ProjectionPlayer();
 
             case 2:
-                return new AngleProjectionPlayer(name(type));
-
-            case 3:
                 return new LighthousePlayer();
-            case 4:
+            case 3:
                 return new EfficientWinningPlayer("Gr8");
-            case 5:
-                return new LighthousePlayerOld();
 
 
             default:

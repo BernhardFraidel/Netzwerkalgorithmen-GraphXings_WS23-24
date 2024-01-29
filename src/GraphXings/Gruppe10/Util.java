@@ -133,6 +133,7 @@ public class Util {
         GameMove move = randomMove(g, gs, r, width, height);
         // If there is no placed vertex return random move
         if (gs.getPlacedVertices().isEmpty()) {
+            System.err.println("random");
             return move;
         }
 
