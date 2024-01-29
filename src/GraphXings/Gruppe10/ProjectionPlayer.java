@@ -48,9 +48,7 @@ public class ProjectionPlayer implements NewPlayer {
      * Creates a projection player with the assigned name.
      */
     public ProjectionPlayer() {
-        this.alternator = 0;
         this.r = new Random();
-        this.lastRoundLastMove = null;
     }
 
     @Override
@@ -78,7 +76,7 @@ public class ProjectionPlayer implements NewPlayer {
         //get a free neighbor of the previously placed vertex if there is one
         //get any free neighbor of any placed vertex else
         Vertex placedVertex = lastMove.getVertex();
-        if (alternator % modulus == 1) {
+        if (alternator % modulus == 1){
             move = randomMove(g, gs, r, width, height);
             lastRoundLastMove = move;
             return move;
@@ -149,9 +147,10 @@ public class ProjectionPlayer implements NewPlayer {
 
     @Override
     public GameMove minimizeCrossings(GameMove lastMove) {
+        applyLastMove(lastMove, gs);
         GameMove move;
         try {
-            move = getMinimizerMove(lastMove);
+            move = getDefaultMinimizerMove(g, gs, r, width, height);
         } catch (Exception e) {
             move = randomMove(g, gs, r, width, height);
         }
@@ -159,57 +158,14 @@ public class ProjectionPlayer implements NewPlayer {
         return move;
     }
 
-
-    private GameMove getMinimizerMove(GameMove lastMove) {
-        // First: Apply the last move by the opponent if there is one.
-        applyLastMove(lastMove, gs);
-        GameMove move = randomMove(g, gs, r, width, height);
-        // If there is no placed vertex return random move
-        if (gs.getPlacedVertices().isEmpty()) {
-            return move;
-        }
-
-        HashMap<Vertex, HashSet<Vertex>> freeNeighboursOfPlacedVertices = getFreeNeighborsOfPlacedVertices(g, gs);
-        Vertex placedVertex = null;
-        Vertex freeVertex = null;
-        for (Map.Entry<Vertex, HashSet<Vertex>> entry : freeNeighboursOfPlacedVertices.entrySet()) {
-            placedVertex = entry.getKey();
-            if (entry.getValue().iterator().hasNext()) {
-                freeVertex = entry.getValue().iterator().next();
-                break;
-            }
-        }
-        Coordinate closestCoordinate = findClosestUnusedCoordinate(gs, placedVertex, width, height);
-        move = new GameMove(freeVertex, closestCoordinate);
-        return move;
-    }
-
     @Override
     public GameMove maximizeCrossingAngles(GameMove lastMove) {
-        // First: Apply the last move by the opponent.
-        if (lastMove != null) {
-            gs.applyMove(lastMove);
-        }
-        // Second: Compute the new move.
-        GameMove randomMove = randomMove(g, gs, r, width, height);
-        // Third: Apply the new move to the local GameState.
-        gs.applyMove(randomMove);
-        // Finally: Return the new move.
-        return randomMove;
+        return randomMove(g, gs, r, width, height);
     }
 
     @Override
     public GameMove minimizeCrossingAngles(GameMove lastMove) {
-        // First: Apply the last move by the opponent.
-        if (lastMove != null) {
-            gs.applyMove(lastMove);
-        }
-        // Second: Compute the new move.
-        GameMove randomMove = randomMove(g, gs, r, width, height);
-        // Third: Apply the new move to the local GameState.
-        gs.applyMove(randomMove);
-        // Finally: Return the new move.
-        return randomMove;
+        return randomMove(g, gs, r, width, height);
     }
 
 
@@ -220,6 +176,8 @@ public class ProjectionPlayer implements NewPlayer {
         this.width = width;
         this.height = height;
         this.gs = new GameState(g, width, height);
+        this.alternator = 0;
+        this.lastRoundLastMove = null;
     }
 
     @Override
