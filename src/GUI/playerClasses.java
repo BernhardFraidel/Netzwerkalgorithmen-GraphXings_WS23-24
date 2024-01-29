@@ -3,7 +3,6 @@ package GUI;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Gruppe10.LighthousePlayer;
-import GraphXings.Gruppe10.ProjectionPlayer;
 import GraphXings.Gruppe8.EfficientWinningPlayer;
 
 import java.util.Collection;
@@ -19,9 +18,8 @@ public class playerClasses {
         // TODO FOR NEW PLAYER CLASS
         // add new players manually
         addPlayer(0, "Random Player");
-        addPlayer(1, "Projection Player");
-        addPlayer(2, "Lighthouse Player");
-        addPlayer(3, "Gr8");
+        addPlayer(1, "Lighthouse Player");
+        addPlayer(2, "Gr8");
     }
 
 
@@ -61,11 +59,9 @@ public class playerClasses {
                 return new NewRandomPlayer(name);
 
             case 1:
-                return new ProjectionPlayer();
+                return new LighthousePlayer();
 
             case 2:
-                return new LighthousePlayer();
-            case 3:
                 return new EfficientWinningPlayer("Gr8");
 
 
@@ -83,11 +79,8 @@ public class playerClasses {
                 return new NewRandomPlayer(name(type));
 
             case 1:
-                return new ProjectionPlayer();
-
-            case 2:
                 return new LighthousePlayer();
-            case 3:
+            case 2:
                 return new EfficientWinningPlayer("Gr8");
 
 

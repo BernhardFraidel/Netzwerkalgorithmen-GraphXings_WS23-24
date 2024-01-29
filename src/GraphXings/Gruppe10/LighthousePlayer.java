@@ -3,6 +3,7 @@ package GraphXings.Gruppe10;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
+import GraphXings.Data.Rational;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
@@ -30,12 +31,99 @@ public class LighthousePlayer implements NewPlayer {
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
-        return null;
+        applyLastMove(lastMove, gs);
+        GameMove move;
+        try {
+            move = getMaximizerMove(lastMove);
+        } catch (Exception e) {
+            System.err.println("random");
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
+    }
+
+    private GameMove getMaximizerMove(GameMove lastMove) throws Exception {
+        GameMove move = randomMove(g, gs, r, width, height);
+        // If there is no placed vertex return random move
+        if (gs.getPlacedVertices().isEmpty()) {
+            return move;
+        }
+
+        //get a free neighbor of the previously placed vertex if there is one
+        //get any free neighbor of any placed vertex else
+        Vertex placedVertex = lastMove.getVertex();
+
+        HashSet<Vertex> candidateNeighbors = getFreeNeighbors(placedVertex, g, gs);
+        Vertex freeNeighbor;
+        if (candidateNeighbors.isEmpty()) {
+            Map<Vertex, Vertex> placedVertexAndFreeNeighbor = getAnyFreeNeighbor(g, gs);
+            placedVertex = placedVertexAndFreeNeighbor.keySet().iterator().next();
+            freeNeighbor = placedVertexAndFreeNeighbor.get(placedVertex);
+        } else {
+            freeNeighbor = candidateNeighbors.iterator().next();
+        }
+
+        //find projection through the middle
+        Coordinate newCoordinate = getProjectionOnBorderThroughMiddle(placedVertex);
+
+        if (!isValidCoordinate(newCoordinate, width, height) || gs.getUsedCoordinates()[newCoordinate.getX()][newCoordinate.getY()] != 0) {
+            throw new Exception();
+        }
+        move = new GameMove(freeNeighbor, newCoordinate);
+        return move;
+    }
+
+    private Coordinate getProjectionOnBorderThroughMiddle(Vertex placedVertex) {
+        Rational xRational;
+        Rational yRational;
+        Coordinate placedVertexCoordinate = gs.getVertexCoordinates().get(placedVertex);
+        Coordinate middle = new Coordinate(width / 2, height / 2);
+        //y = a*x + b
+        boolean vertical = middle.getX() == placedVertexCoordinate.getX();
+        Rational a;
+        Rational b;
+        if (vertical) {
+            a = null;
+            b = null;
+        } else {
+            int deltaY = middle.getY() - placedVertexCoordinate.getY();
+            int deltaX = middle.getX() - placedVertexCoordinate.getX();
+            a = new Rational(deltaY, deltaX);
+            b = Rational.minus(new Rational(middle.getY()), Rational.times(a, new Rational(middle.getX())));
+        }
+
+        Rational zero = new Rational(0);
+        Rational heightRational = new Rational(height);
+        if (!vertical && (!Rational.lesserEqual(b, zero) || Rational.equals(b, zero)) && Rational.lesserEqual(b, heightRational)) {
+            //decide if left or right depending on position of placed vertex left or right of the middle
+            xRational = new Rational(placedVertexCoordinate.getX() > middle.getX() ? width : 0);
+            //intersects left and right boundary
+            yRational = (placedVertexCoordinate.getX() > middle.getX()) ? b : Rational.plus(Rational.times(a, xRational), b);
+        } else {
+            //intersects top and bottom boundary
+            //decide if top or bottom depending on position of placed vertex above or below the middle
+            yRational = new Rational(placedVertexCoordinate.getY() > middle.getY() ? 0 : height);
+            //yRational = a*x+b --> (yRational - b) / a = x(Rational)
+            xRational = vertical ? new Rational(middle.getX()) : Rational.dividedBy(Rational.minus(yRational, b), a);
+        }
+
+        Coordinate nearestValidCoordinate = nearestValidCoordinate(xRational, yRational, width, height);
+        return findClosestUnusedCoordinateMiddle(gs, nearestValidCoordinate, width, height);
     }
 
     @Override
     public GameMove minimizeCrossings(GameMove lastMove) {
-        return null;
+        applyLastMove(lastMove, gs);
+        GameMove move;
+        try {
+            move = getDefaultMinimizerMove(g, gs, r, width, height);
+        } catch (Exception e) {
+            System.err.println("random");
+            move = randomMove(g, gs, r, width, height);
+        }
+        gs.applyMove(move);
+        return move;
     }
 
     @Override
