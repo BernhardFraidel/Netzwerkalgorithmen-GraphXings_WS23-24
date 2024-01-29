@@ -36,7 +36,6 @@ public class LighthousePlayer implements NewPlayer {
         try {
             move = getMaximizerMove(lastMove);
         } catch (Exception e) {
-            System.err.println("random");
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
@@ -119,7 +118,6 @@ public class LighthousePlayer implements NewPlayer {
         try {
             move = getDefaultMinimizerMove(g, gs, r, width, height);
         } catch (Exception e) {
-            System.err.println("random");
             move = randomMove(g, gs, r, width, height);
         }
         gs.applyMove(move);
