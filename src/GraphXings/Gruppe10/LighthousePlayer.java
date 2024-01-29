@@ -167,7 +167,7 @@ public class LighthousePlayer implements NewPlayer {
             v = getAnyFreeVertexWithHighestDegree(g, gs);
         } else {
             try {
-                v = getFreeNeighborWithHighestDegree(previouslyPlacedVertex, g, gs);
+                v = getFreeNeighbors(previouslyPlacedVertex, g, gs).iterator().next();
             } catch (NoSuchElementException e) {
                 v = null;
             }
