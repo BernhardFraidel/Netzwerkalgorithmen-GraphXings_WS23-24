@@ -43,10 +43,18 @@ public class LighthousePlayer implements NewPlayer {
     }
 
     private GameMove getMaximizerMove(GameMove lastMove) throws Exception {
-        GameMove move = randomMove(g, gs, r, width, height);
-        // If there is no placed vertex return random move
-        if (gs.getPlacedVertices().isEmpty()) {
-            return move;
+        // in the first 4 rounds place vertex with the highest degree in corners
+        if (roundCounter < 4) {
+            Coordinate c = switch (roundCounter) {
+                case 0 -> new Coordinate(0, 0);
+                case 1 -> new Coordinate(width, 0);
+                case 2 -> new Coordinate(0, height);
+                case 3 -> new Coordinate(width, height);
+                default -> throw new IllegalStateException("Unexpected value: " + roundCounter);
+            };
+            Vertex v = getAnyFreeVertexWithHighestDegree(g, gs);
+            roundCounter++;
+            return new GameMove(v, findClosestUnusedCoordinate(gs, c, width, height));
         }
 
         //get a free neighbor of the previously placed vertex if there is one
@@ -69,8 +77,7 @@ public class LighthousePlayer implements NewPlayer {
         if (!isValidCoordinate(newCoordinate, width, height) || gs.getUsedCoordinates()[newCoordinate.getX()][newCoordinate.getY()] != 0) {
             throw new Exception();
         }
-        move = new GameMove(freeNeighbor, newCoordinate);
-        return move;
+        return new GameMove(freeNeighbor, newCoordinate);
     }
 
     private Coordinate getProjectionOnBorderThroughMiddle(Vertex placedVertex) {
