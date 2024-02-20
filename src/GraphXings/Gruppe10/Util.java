@@ -78,6 +78,7 @@ public class Util {
 
     /**
      * Gets any free (unplaced) vertex.
+     *
      * @return any free vertex or null if there are no free vertices.
      */
     public static Vertex getAnyFreeVertex(Graph g, GameState gs) {
@@ -87,6 +88,32 @@ public class Util {
             }
         }
         return null;
+    }
+
+    public static Vertex getAnyFreeVertexWithHighestDegree(Graph g, GameState gs) {
+        Set<Vertex> freeVertices = new HashSet<>();
+        for (Vertex v : g.getVertices()) {
+            if (!gs.getPlacedVertices().contains(v)) {
+                freeVertices.add(v);
+            }
+        }
+        return getVertexWithHighestDegree(freeVertices, g);
+    }
+
+    private static Vertex getVertexWithHighestDegree(Set<Vertex> vertices, Graph g) {
+        Vertex w = null;
+        int degreeOfW = -1;
+        for (Vertex v : vertices) {
+            int degreeOfV = 0;
+            for (Edge ignored : g.getIncidentEdges(v)) {
+                degreeOfV++;
+            }
+            if (degreeOfV > degreeOfW) {
+                degreeOfW = degreeOfV;
+                w = v;
+            }
+        }
+        return w;
     }
 
     /**
@@ -116,6 +143,11 @@ public class Util {
         return neighbors;
     }
 
+    public static Vertex getFreeNeighborWithHighestDegree(Vertex v, Graph g, GameState gs) {
+        Set<Vertex> freeNeighbors = getFreeNeighbors(v, g, gs);
+        return getVertexWithHighestDegree(freeNeighbors, g);
+    }
+
     public static Vertex getAnyFreeNeighborOfVertexSet(Set<Vertex> vertices, Graph g, GameState gs) {
         try {
             for (Vertex v : vertices) {
@@ -133,6 +165,7 @@ public class Util {
         GameMove move = randomMove(g, gs, r, width, height);
         // If there is no placed vertex return random move
         if (gs.getPlacedVertices().isEmpty()) {
+            System.err.println("random");
             return move;
         }
 

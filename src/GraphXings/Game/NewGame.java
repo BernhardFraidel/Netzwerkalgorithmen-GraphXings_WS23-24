@@ -3,9 +3,11 @@ package GraphXings.Game;
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Graph;
-import GraphXings.Legacy.Game.InvalidMoveException;
+//import GraphXings.Legacy.Game.InvalidMoveException;
 
 import java.util.Random;
+
+import GUI.MainWindow;
 
 /**
  * A class for managing a game of GraphXings!
@@ -47,6 +49,13 @@ public class NewGame
 	 * The time limit for players.
 	 */
 	private long timeLimit;
+
+
+	/** 
+	* The game state 
+	*/
+
+	private GameState gs;
 
 	/**
 	 * Instantiates a game of GraphXings.
@@ -114,6 +123,10 @@ public class NewGame
 	 */
 	public NewGameResult play()
 	{
+		// BEGIN: Added for GUI
+			MainWindow window = MainWindow.getInstance();
+		// END: Added for GUI
+
 		Random r = new Random(System.nanoTime());
 		if (r.nextBoolean())
 		{
@@ -121,15 +134,37 @@ public class NewGame
 			player1 = player2;
 			player2 = swap;
 		}
+
+		// BEGIN: Added for GUI
+			GuiGameResult resultGui;
+		// END: Added for GUI
+
+
 		try
 		{
 			double scoreGame1 = playRound(player1, player2);
+
+			// BEGIN: Added for GUI
+			window.addGameResult(new GuiGameResult(g, gs, player1.getName() +  "(1)", player2.getName() +  "(2)"));
+			// END: Added for GUI
+
 			double scoreGame2 = playRound(player2, player1);
+
+			// BEGIN: Added for GUI
+			window.addGameResult(new GuiGameResult(g, gs, player2.getName() +  "(2)", player1.getName() +  "(1)"));
+			// END: Added for GUI
+
+
 			return new NewGameResult(scoreGame1,scoreGame2,player1,player2,false,false,false,false, objective);
 		}
 		catch (NewInvalidMoveException ex)
 		{
 			System.out.println("E001:" + ex.getCheater().getName() + " cheated!");
+
+			// BEGIN: Added for GUI
+			//window.addGameResult(new GuiGameResult(g, gs));
+			// END: Added for GUI
+
 			if (ex.getCheater().equals(player1))
 			{
 				return new NewGameResult(0, 0, player1, player2,true,false,false,false, objective);
@@ -146,6 +181,11 @@ public class NewGame
 		catch (NewTimeOutException ex)
 		{
 			System.out.println("E002:" +ex.getTimeOutPlayer().getName() + " ran out of time!");
+
+			// BEGIN: Added for GUI
+			//window.addGameResult(new GuiGameResult(g, gs));
+			// END: Added for GUI
+
 			if (ex.getTimeOutPlayer().equals(player1))
 			{
 				return new NewGameResult(0, 0, player1, player2,false,false,true,false, objective);
@@ -171,7 +211,7 @@ public class NewGame
 	private double playRound(NewPlayer maximizer, NewPlayer minimizer) throws NewInvalidMoveException, NewTimeOutException
 	{
 		int turn = 0;
-		GameState gs = new GameState(g,width,height);
+		gs = new GameState(g,width,height);
 		GameMove lastMove = null;
 		long timeMaximizer = 0;
 		long timeMinimizer = 0;

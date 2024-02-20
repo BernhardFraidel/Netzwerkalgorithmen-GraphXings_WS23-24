@@ -7,17 +7,21 @@ import GraphXings.Game.League.NewLeague;
 import GraphXings.Game.League.NewLeagueResult;
 import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
-import GraphXings.Gruppe10.LighthousePlayer;
-
 import java.util.ArrayList;
+
+import GUI.MainWindow;
 
 public class GraphXings
 {
-    public static void main (String[] args)
+ 
+ // original main()-function
+     
+/*     public static void main (String[] args)
     {
         ArrayList<NewPlayer> players = new ArrayList<>();
         players.add(new NewRandomPlayer("R1"));
-        players.add(new LighthousePlayer());
+        players.add(new NewRandomPlayer("R2"));
+        players.add(new NewRandomPlayer("R3"));
         long timeLimit = 300000000000l;
         long seed = 27081883;
         int bestOf = 1;
@@ -26,7 +30,22 @@ public class GraphXings
         runLeague(players,bestOf,timeLimit,factory,matchType,seed);
         //runRemainingMatches(player,players,bestOf,timeLimit,factory);
     }
+*/
 
+    /**
+     * main()-function for the GUI
+     * @param args
+     */
+    public static void main (String[] args)
+    {
+        System.setProperty("sun.java2d.uiScale", "2.0");
+
+
+        MainWindow.getInstance();
+    }
+
+    // The following functions are part of the MainWindow class now.
+    /*
     public static void runLeague(ArrayList<NewPlayer> players, int bestOf, long timeLimit, GameInstanceFactory factory, NewMatch.MatchType matchType, long seed)
     {
         NewLeague l = new NewLeague(players,bestOf,timeLimit,factory,matchType,seed);
@@ -43,4 +62,5 @@ public class GraphXings
             System.out.println("Match " + i++ + ": " + mr.announceResult());
         }
     }
+    */
 }
